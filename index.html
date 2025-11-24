@@ -1,0 +1,1340 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Moshe Shtaygrud — Developer Portfolio</title>
+    <meta name="description"
+        content="Portfolio of Moshe Shtaygrud, Software Developer & Full Stack Engineer specialized in AI, Automation, and Finance.">
+    <meta property="og:title" content="Moshe Shtaygrud — Developer Portfolio">
+    <meta property="og:description" content="Interactive Terminal Portfolio.">
+
+    <style>
+        :root {
+            --bg-color: #e0e5ec;
+            --window-bg: rgba(255, 255, 255, 0.95);
+            --term-bg: #1e1e1e;
+            --term-text: #f0f0f0;
+            --term-bar: #3a3a3a;
+            --accent: #27c93f;
+            --text-main: #333;
+            --dock-bg: rgba(255, 255, 255, 0.2);
+            --dock-border: rgba(255, 255, 255, 0.3);
+            --link-color: #4da6ff;
+            --prompt-color: #27c93f;
+
+            /* App Specific Colors for Fake Windows */
+            --vscode-bg: #1e1e1e;
+            --vscode-sidebar: #252526;
+            --vscode-activity: #333333;
+            --postman-header: #ef5b25;
+            --sql-bg: #f5f5f5;
+            --devtools-bg: #242424;
+        }
+
+        body.theme-dark {
+            --bg-color: #1a1b26;
+            --window-bg: rgba(40, 44, 52, 0.95);
+            --term-bg: #0d1117;
+            --term-text: #c9d1d9;
+            --term-bar: #161b22;
+            --accent: #58a6ff;
+            --text-main: #f0f0f0;
+            --dock-bg: rgba(0, 0, 0, 0.3);
+            --dock-border: rgba(255, 255, 255, 0.1);
+            --link-color: #58a6ff;
+            --prompt-color: #7ee787;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            background-image: linear-gradient(135deg, var(--bg-color) 0%, rgba(0, 0, 0, 0.05) 100%);
+            height: 100vh;
+            overflow: hidden;
+            transition: background 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Menu Bar */
+        #menubar {
+            height: 30px;
+            background: rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 15px;
+            font-size: 14px;
+            color: var(--text-main);
+            user-select: none;
+            z-index: 100;
+        }
+
+        body.theme-dark #menubar {
+            background: rgba(0, 0, 0, 0.3);
+            color: #eee;
+        }
+
+        .menu-left,
+        .menu-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .apple-icon {
+            font-weight: bold;
+        }
+
+        .app-name {
+            font-weight: 600;
+        }
+
+        /* Desktop Area */
+        #desktop {
+            flex: 1;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        /* --- Fake Background Windows --- */
+        .bg-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            /* Behind Terminal */
+            pointer-events: none;
+            /* Non-interactive */
+        }
+
+        .bg-window {
+            position: absolute;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            opacity: 0.7;
+            /* Slightly higher opacity for better visibility of fake interactions */
+            transition: opacity 0.3s ease, top 1s ease, left 1s ease;
+            /* For drag animation */
+            animation: bgFadeIn 1s ease-out;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        /* Fake Window Chrome */
+        .bg-title-bar {
+            height: 24px;
+            background: #e1e1e1;
+            /* Default light chrome */
+            display: flex;
+            align-items: center;
+            padding-left: 8px;
+            gap: 6px;
+        }
+
+        .bg-window.dark-app .bg-title-bar {
+            background: #333;
+        }
+
+        .bg-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #ccc;
+        }
+
+        .bg-dot.r {
+            background: #ff5f56;
+        }
+
+        .bg-dot.y {
+            background: #ffbd2e;
+        }
+
+        .bg-dot.g {
+            background: #27c93f;
+        }
+
+        .bg-content {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+            font-family: monospace;
+            font-size: 10px;
+        }
+
+        /* 1. VS Code */
+        #vscode-app {
+            top: 5%;
+            left: 2%;
+            width: 45%;
+            height: 70%;
+            background: var(--vscode-bg);
+            color: #ccc;
+        }
+
+        #vscode-app .bg-content {
+            display: flex;
+        }
+
+        .vs-activity {
+            width: 30px;
+            background: var(--vscode-activity);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 10px;
+            gap: 10px;
+        }
+
+        .vs-icon {
+            width: 16px;
+            height: 16px;
+            background: #666;
+            border-radius: 2px;
+        }
+
+        .vs-sidebar {
+            width: 120px;
+            background: var(--vscode-sidebar);
+            border-right: 1px solid #333;
+            padding: 10px;
+        }
+
+        .vs-editor {
+            flex: 1;
+            padding: 10px;
+            background: #1e1e1e;
+            color: #d4d4d4;
+            overflow: hidden;
+        }
+
+        .code-line {
+            margin-bottom: 2px;
+            white-space: pre;
+        }
+
+        .kw {
+            color: #569cd6;
+        }
+
+        /* Keyword */
+        .str {
+            color: #ce9178;
+        }
+
+        /* String */
+        .fn {
+            color: #dcdcaa;
+        }
+
+        /* Function */
+        .blink-cursor {
+            display: inline-block;
+            width: 2px;
+            height: 12px;
+            background: #569cd6;
+            animation: blink 1s step-end infinite;
+        }
+
+        /* 2. Postman */
+        #postman-app {
+            top: 10%;
+            right: 2%;
+            width: 40%;
+            height: 50%;
+            background: #fff;
+        }
+
+        #postman-app.dark-app {
+            background: #212121;
+            color: #eee;
+        }
+
+        .pm-layout {
+            display: flex;
+            height: 100%;
+        }
+
+        .pm-sidebar {
+            width: 100px;
+            background: #f0f0f0;
+            border-right: 1px solid #ddd;
+        }
+
+        .pm-main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .pm-req-bar {
+            height: 40px;
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            align-items: center;
+            padding: 0 10px;
+            gap: 5px;
+            background: #fafafa;
+        }
+
+        .pm-method {
+            color: #ef5b25;
+            font-weight: bold;
+            font-size: 10px;
+        }
+
+        .pm-input {
+            flex: 1;
+            background: #e6e6e6;
+            height: 24px;
+            border-radius: 4px;
+        }
+
+        .pm-send {
+            width: 50px;
+            height: 24px;
+            background: #0078d4;
+            border-radius: 4px;
+            transition: transform 0.1s;
+        }
+
+        .pm-send.clicked {
+            transform: scale(0.95);
+            background: #005a9e;
+        }
+
+        .pm-resp {
+            flex: 1;
+            padding: 10px;
+            font-family: monospace;
+            color: #27c93f;
+            overflow: hidden;
+        }
+
+        .pm-resp.highlight {
+            background: rgba(39, 201, 63, 0.1);
+            transition: background 0.2s;
+        }
+
+        /* 3. SQL Client */
+        #sql-app {
+            bottom: 5%;
+            left: 5%;
+            width: 35%;
+            height: 40%;
+            background: #fff;
+            color: #333;
+            border: 1px solid #ccc;
+        }
+
+        .sql-layout {
+            display: flex;
+            height: 100%;
+        }
+
+        .sql-tree {
+            width: 80px;
+            background: #f5f5f5;
+            border-right: 1px solid #ddd;
+            padding: 5px;
+        }
+
+        .sql-main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sql-query {
+            height: 40%;
+            border-bottom: 1px solid #ddd;
+            padding: 5px;
+            background: #fff;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+
+        .sql-grid {
+            flex: 1;
+            background: #fafafa;
+            padding: 5px;
+            overflow: hidden;
+        }
+
+        .sql-grid.flash {
+            background: #e0f7fa;
+        }
+
+        .sql-row {
+            display: flex;
+            border-bottom: 1px solid #eee;
+            margin-bottom: 2px;
+            font-size: 9px;
+        }
+
+        .sql-cell {
+            flex: 1;
+            border-right: 1px solid #eee;
+            padding: 2px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* 4. DevTools */
+        #devtools-app {
+            bottom: -2%;
+            right: 5%;
+            width: 45%;
+            height: 40%;
+            background: var(--devtools-bg);
+            color: #a8c7fa;
+            font-size: 11px;
+        }
+
+        .dt-tabs {
+            height: 24px;
+            background: #333;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            padding-left: 10px;
+            color: #ccc;
+            border-bottom: 1px solid #444;
+        }
+
+        .dt-body {
+            display: flex;
+            height: calc(100% - 24px);
+        }
+
+        .dt-elements {
+            flex: 1;
+            padding: 5px;
+            border-right: 1px solid #444;
+            color: #d5d5d5;
+            overflow: hidden;
+        }
+
+        .dt-console {
+            flex: 1;
+            padding: 5px;
+            background: #242424;
+            font-family: monospace;
+            overflow-y: hidden;
+        }
+
+        .tag {
+            color: #569cd6;
+        }
+
+        .attr {
+            color: #9cdcfe;
+        }
+
+        .val {
+            color: #ce9178;
+        }
+
+        .log-info {
+            color: #ccc;
+            border-bottom: 1px solid #333;
+            margin-bottom: 2px;
+        }
+
+        /* --- Fake Mouse --- */
+        #fake-cursor {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 18px;
+            height: 18px;
+            z-index: 5;
+            /* Above apps, below terminal */
+            pointer-events: none;
+            transition: transform 0.6s cubic-bezier(0.25, 0.1, 0.25, 1);
+            filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.4));
+        }
+
+        #fake-cursor svg {
+            width: 100%;
+            height: 100%;
+            fill: white;
+            stroke: black;
+            stroke-width: 1px;
+        }
+
+        @keyframes blink {
+            50% {
+                opacity: 0;
+            }
+        }
+
+        @keyframes bgFadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.98) translateY(10px);
+            }
+
+            to {
+                opacity: 0.7;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        /* Main Terminal (Original) */
+        #terminal-window {
+            width: 800px;
+            height: 500px;
+            background-color: var(--term-bg);
+            border-radius: 8px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            animation: fadeIn 0.4s ease-out;
+            max-width: 95%;
+            max-height: 80%;
+            z-index: 10;
+            /* Above Fake Mouse */
+            position: relative;
+        }
+
+        .window-bar {
+            height: 30px;
+            background-color: var(--term-bar);
+            display: flex;
+            align-items: center;
+            padding: 0 10px;
+            position: relative;
+        }
+
+        .window-controls {
+            display: flex;
+            gap: 8px;
+        }
+
+        .control {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .close {
+            background-color: #ff5f56;
+        }
+
+        .minimize {
+            background-color: #ffbd2e;
+        }
+
+        .maximize {
+            background-color: #27c93f;
+        }
+
+        .window-title {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #888;
+            font-size: 13px;
+        }
+
+        #terminal-body {
+            flex: 1;
+            padding: 10px;
+            overflow-y: auto;
+            color: var(--term-text);
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        #terminal-body::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        #terminal-body::-webkit-scrollbar-thumb {
+            background: #555;
+            border-radius: 4px;
+        }
+
+        .output-line {
+            margin-bottom: 5px;
+            word-wrap: break-word;
+        }
+
+        .command-entered {
+            color: var(--term-text);
+            font-weight: bold;
+        }
+
+        .welcome-banner {
+            color: var(--accent);
+            font-weight: bold;
+            margin-bottom: 15px;
+            white-space: pre-wrap;
+        }
+
+        .help-table {
+            display: table;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .help-row {
+            display: table-row;
+        }
+
+        .help-cmd {
+            display: table-cell;
+            width: 100px;
+            color: var(--accent);
+            padding-bottom: 4px;
+        }
+
+        .help-desc {
+            display: table-cell;
+            padding-bottom: 4px;
+        }
+
+        .section-header {
+            color: var(--accent);
+            font-weight: bold;
+            margin-top: 15px;
+            border-bottom: 1px dashed #555;
+            padding-bottom: 5px;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+
+        .project-item {
+            margin-bottom: 15px;
+        }
+
+        .project-title {
+            color: var(--link-color);
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        .project-tech {
+            color: #888;
+            font-size: 0.9em;
+            font-style: italic;
+        }
+
+        .project-desc {
+            margin-left: 15px;
+            border-left: 2px solid #444;
+            padding-left: 10px;
+            margin-top: 5px;
+        }
+
+        a {
+            color: var(--link-color);
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        .input-line {
+            display: flex;
+            align-items: center;
+        }
+
+        .prompt {
+            color: var(--prompt-color);
+            margin-right: 8px;
+            white-space: nowrap;
+        }
+
+        #cmd-input {
+            background: transparent;
+            border: none;
+            color: var(--term-text);
+            font-family: inherit;
+            font-size: inherit;
+            flex: 1;
+            outline: none;
+        }
+
+        /* Dock */
+        #dock {
+            height: 60px;
+            background: var(--dock-bg);
+            border: 1px solid var(--dock-border);
+            border-radius: 16px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            padding: 0 20px;
+            backdrop-filter: blur(10px);
+            align-self: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            z-index: 20;
+        }
+
+        .dock-icon {
+            font-size: 32px;
+            transition: transform 0.2s;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .dock-icon:hover {
+            transform: scale(1.2) translateY(-10px);
+        }
+
+        .dock-tooltip {
+            position: absolute;
+            top: -35px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s;
+            white-space: nowrap;
+        }
+
+        .dock-icon:hover .dock-tooltip {
+            opacity: 1;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            #terminal-window {
+                width: 95%;
+                height: 70%;
+            }
+
+            .bg-window,
+            #fake-cursor {
+                display: none !important;
+            }
+
+            /* Hide complex bg & mouse on mobile */
+            .help-cmd {
+                display: block;
+                width: auto;
+                font-weight: bold;
+            }
+
+            .help-row {
+                display: block;
+                margin-bottom: 8px;
+            }
+
+            #menubar {
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+
+<body class="theme-light">
+
+    <div id="menubar">
+        <div class="menu-left">
+            <span class="apple-icon"></span>
+            <span class="app-name">Moshe Shtaygrud</span>
+            <span>File</span>
+            <span>Edit</span>
+            <span>View</span>
+        </div>
+        <div class="menu-right">
+            <span id="clock">12:00 PM</span>
+            <span>🔋 100%</span>
+            <span>Wi-Fi</span>
+            <span>🔍</span>
+            <span>MS</span>
+        </div>
+    </div>
+
+    <div id="desktop">
+
+        <div id="fake-cursor">
+            <svg viewBox="0 0 24 24">
+                <path
+                    d="M5.5 3.21V20.8c0 .45.54.67.85.35l4.86-4.86a.5.5 0 0 1 .35-.15h6.8c.45 0 .67-.54.35-.85L6.35 2.36a.5.5 0 0 0-.85.85z" />
+            </svg>
+        </div>
+
+        <div class="bg-layer">
+
+            <div id="vscode-app" class="bg-window vscode dark-app">
+                <div class="bg-title-bar">
+                    <div class="bg-dot r"></div>
+                    <div class="bg-dot y"></div>
+                    <div class="bg-dot g"></div><span>portfolio - Visual Studio Code</span>
+                </div>
+                <div class="bg-content">
+                    <div class="vs-activity">
+                        <div class="vs-icon" style="background:#fff;"></div>
+                        <div class="vs-icon"></div>
+                        <div class="vs-icon"></div>
+                    </div>
+                    <div class="vs-sidebar">
+                        <div style="color:#bbb; font-weight:bold; margin-bottom:5px;">EXPLORER</div>
+                        <div style="color:#ccc;">> PORTFOLIO</div>
+                        <div style="padding-left:10px; color:#569cd6;">📄 index.html</div>
+                        <div style="padding-left:10px; color:#d4d4d4;">📄 style.css</div>
+                        <div style="padding-left:10px; color:#dcdcaa;">📄 app.js</div>
+                    </div>
+                    <div id="vs-editor-content" class="vs-editor">
+                        <div class="code-line"><span class="kw">function</span> <span class="fn">initPortfolio</span>()
+                            {</div>
+                        <div class="code-line">&nbsp;&nbsp;<span class="kw">const</span> <span class="str">user</span> =
+                            <span class="str">"Moshe"</span>;</div>
+                        <div class="code-line">&nbsp;&nbsp;<span class="kw">if</span> (isDev) {</div>
+                        <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;console.<span class="fn">log</span>(<span
+                                class="str">"Ready..."</span>);</div>
+                        <div class="code-line">&nbsp;&nbsp;}</div>
+                        <div class="code-line">}</div>
+                        <span class="blink-cursor"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div id="postman-app" class="bg-window postman">
+                <div class="bg-title-bar">
+                    <div class="bg-dot r"></div>
+                    <div class="bg-dot y"></div>
+                    <div class="bg-dot g"></div><span>Postman</span>
+                </div>
+                <div class="bg-content pm-layout">
+                    <div class="pm-sidebar">
+                        <div style="padding:5px; border-bottom:1px solid #ddd;">Collections</div>
+                        <div style="padding:5px; color:#555;">📁 Users API</div>
+                        <div style="padding:5px; color:#555;">📁 Auth</div>
+                    </div>
+                    <div class="pm-main">
+                        <div class="pm-req-bar">
+                            <span class="pm-method">GET</span>
+                            <div class="pm-input"></div>
+                            <div id="pm-send-btn" class="pm-send"></div>
+                        </div>
+                        <div id="pm-response" class="pm-resp">
+                            <pre class="pm-resp-anim">{
+  "status": "ok",
+  "data": [
+    { "id": 1, "role": "dev" }
+  ]
+}</pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="sql-app" class="bg-window sql-client">
+                <div class="bg-title-bar">
+                    <div class="bg-dot r"></div>
+                    <div class="bg-dot y"></div>
+                    <div class="bg-dot g"></div><span>pgAdmin 4</span>
+                </div>
+                <div class="bg-content sql-layout">
+                    <div class="sql-tree">
+                        <div>Servers</div>
+                        <div style="padding-left:5px;">📂 Local</div>
+                        <div style="padding-left:10px;">🛢️ mydb</div>
+                    </div>
+                    <div class="sql-main">
+                        <div id="sql-query-box" class="sql-query">SELECT * FROM projects LIMIT 5;</div>
+                        <div id="sql-grid-box" class="sql-grid">
+                            <div class="sql-row" style="font-weight:bold; background:#eee;">
+                                <div class="sql-cell">id</div>
+                                <div class="sql-cell">name</div>
+                                <div class="sql-cell">status</div>
+                            </div>
+                            <div class="sql-row">
+                                <div class="sql-cell">101</div>
+                                <div class="sql-cell">VertiSite</div>
+                                <div class="sql-cell">Done</div>
+                            </div>
+                            <div class="sql-row">
+                                <div class="sql-cell">102</div>
+                                <div class="sql-cell">Dashline</div>
+                                <div class="sql-cell">Active</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="devtools-app" class="bg-window devtools">
+                <div class="bg-title-bar">
+                    <div class="bg-dot r"></div>
+                    <div class="bg-dot y"></div>
+                    <div class="bg-dot g"></div><span>DevTools - Portfolio</span>
+                </div>
+                <div class="bg-content">
+                    <div class="dt-tabs">
+                        <span>Elements</span>
+                        <span style="color:#fff; border-bottom:2px solid #569cd6;">Console</span>
+                        <span>Sources</span>
+                    </div>
+                    <div class="dt-body">
+                        <div id="dt-elements-box" class="dt-elements">
+                            <div><span class="tag">&lt;body&gt;</span></div>
+                            <div style="padding-left:10px;"><span class="tag">&lt;div</span> <span
+                                    class="attr">id</span>=<span class="val">"root"</span><span class="tag">&gt;</span>
+                            </div>
+                            <div style="padding-left:20px;">...</div>
+                            <div style="padding-left:10px;"><span class="tag">&lt;/div&gt;</span></div>
+                            <div><span class="tag">&lt;/body&gt;</span></div>
+                        </div>
+                        <div id="dt-console-box" class="dt-console">
+                            <div class="log-info">[info] Loaded portfolio env...</div>
+                            <div class="log-info">[info] Terminal ready.</div>
+                            <div class="log-info" style="color:#e6c07b;">[warn] Low coffee levels.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div id="terminal-window">
+            <div class="window-bar">
+                <div class="window-controls">
+                    <div class="control close"></div>
+                    <div class="control minimize"></div>
+                    <div class="control maximize"></div>
+                </div>
+                <div class="window-title">moshe — -zsh — 80x24</div>
+            </div>
+            <div id="terminal-body">
+                <div class="input-line">
+                    <span class="prompt">visitor@moshe-portfolio %</span>
+                    <input type="text" id="cmd-input" autocomplete="off" spellcheck="false" autofocus>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div id="dock">
+        <div class="dock-icon" onclick="focusTerminal()">
+            💻
+            <div class="dock-tooltip">Terminal</div>
+        </div>
+        <div class="dock-icon" onclick="runCommand('home')">
+            🏠
+            <div class="dock-tooltip">Home</div>
+        </div>
+        <div class="dock-icon" onclick="runCommand('projects')">
+            🚀
+            <div class="dock-tooltip">Projects</div>
+        </div>
+        <div class="dock-icon" onclick="runCommand('resume')">
+            📄
+            <div class="dock-tooltip">Resume</div>
+        </div>
+        <div class="dock-icon" onclick="runCommand('contact')">
+            ✉️
+            <div class="dock-tooltip">Contact</div>
+        </div>
+    </div>
+
+    <script>
+        /* Moshe Shtaygrud Portfolio */
+
+        // --- Data ---
+        const data = {
+            name: "Moshe Shtaygrud",
+            role: "Software Developer / Full Stack Engineer",
+            tagline: "Building autonomous agents, geospatial platforms, and fintech solutions.",
+            location: "New York, NY",
+            email: "mshtaygrud@gmail.com",
+            github: "https://github.com/roomfulmoshe",
+            linkedin: "https://www.linkedin.com/in/mosheshtaygrud",
+            resumeUrl: "Moshe_Shtaygrud_resume.pdf"
+        };
+
+        // --- Terminal Logic ---
+        const terminalBody = document.getElementById('terminal-body');
+        const cmdInput = document.getElementById('cmd-input');
+        const inputLine = document.querySelector('.input-line');
+        let history = [];
+        let historyIndex = -1;
+
+        const commands = {
+            help: {
+                desc: "List available commands",
+                fn: () => `
+<div class="section-header">Available Commands</div>
+<div class="help-table">
+    <div class="help-row"><span class="help-cmd">home</span><span class="help-desc">Show the main overview</span></div>
+    <div class="help-row"><span class="help-cmd">about</span><span class="help-desc">Learn more about my background & skills</span></div>
+    <div class="help-row"><span class="help-cmd">projects</span><span class="help-desc">Browse selected works</span></div>
+    <div class="help-row"><span class="help-cmd">resume</span><span class="help-desc">Preview and download CV</span></div>
+    <div class="help-row"><span class="help-cmd">contact</span><span class="help-desc">Contact information</span></div>
+    <div class="help-row"><span class="help-cmd">theme</span><span class="help-desc">Toggle light/dark mode</span></div>
+    <div class="help-row"><span class="help-cmd">clear</span><span class="help-desc">Clear the terminal</span></div>
+</div>`
+            },
+            ls: { desc: "Alias for help", fn: () => commands.help.fn() },
+            home: {
+                desc: "Main overview",
+                fn: () => `
+<div class="welcome-banner">
+  __  __           _          
+ |  \\/  | ___  ___| |__   ___ 
+ | |\\/| |/ _ \\/ __| '_ \\ / _ \\
+ | |  | | (_) \\__ \\ | | |  __/
+ |_|  |_|\\___/|___/_| |_|\\___|  ${data.name}
+</div>
+<div><strong>${data.role}</strong></div>
+<div>${data.tagline}</div>
+<br>
+<div>
+• <strong>Education:</strong> MSCS at Georgia Tech (Expected 2027), BS at CUNY Queens (Summa Cum Laude)<br>
+• <strong>Focus:</strong> AI Agents, Automation, Full Stack Web, Financial Tech<br>
+• <strong>Location:</strong> ${data.location}<br>
+</div>
+<br>
+<div>Type <span style="color:var(--accent)">help</span> to see more.</div>`
+            },
+            about: {
+                desc: "Background & Skills",
+                fn: () => `
+<div class="section-header">About Me</div>
+<p>I fell in love with what a few lines of code can do for the world. I harness the power of technology to create innovative solutions in AI, Blockchain, and Automation. Currently working as a Software Developer at Dashline, building autonomous Natural Language-to-SQL agents.</p>
+<p>I am pursuing my MS in Computer Science at Georgia Tech. Previously, I interned at Roomful and won the Blackstone Launchpad Business Competition.</p>
+<div class="section-header">Technical Skills</div>
+• <strong>Languages:</strong> Python, SQL, JavaScript, Java, C++, HTML, CSS, Deluge
+• <strong>Frameworks:</strong> React, Next.js, Node.js (Express/Fastify), Flask, FastAPI, PyTorch, Pandas
+• <strong>Tools/Cloud:</strong> AWS, GCP, Azure, Docker, Git, Linux, N8N, Firebase
+• <strong>Databases:</strong> PostgreSQL, MySQL, Redis, MongoDB`
+            },
+            projects: {
+                desc: "Selected Works",
+                fn: () => `
+<div class="section-header">Recent Projects</div>
+<div class="project-item">
+    <a href="https://github.com/roomfulmoshe/VertiSite" target="_blank" class="project-title">VertiSite: Urban Air Mobility Planner</a>
+    <div class="project-tech">Python, D3.js, Geospatial Analysis</div>
+    <div class="project-desc">
+        • Architected a geospatial platform to optimize vertiport placement using greedy algorithms.<br>
+        • Processed 5M+ trip records and engineered ETL pipelines merging taxi and census data.
+    </div>
+</div>
+<div class="project-item">
+    <span class="project-title">Autonomous NLP-to-SQL Agent (Dashline)</span>
+    <div class="project-tech">Python, MCP, N8N, LLMs</div>
+    <div class="project-desc">
+        • Engineered an agent that dynamically identifies schemas and executes multi-join SQL queries.<br>
+        • Integrated Human-in-the-Loop verification and automated executive dashboard generation.
+    </div>
+</div>
+<div class="project-item">
+    <a href="https://github.com/roomfulmoshe/paper_trading_project" target="_blank" class="project-title">Stock Market Simulator</a>
+    <div class="project-tech">JavaScript, Firebase, Financial Modeling API</div>
+    <div class="project-desc">
+        • Developed a risk-free trading platform with real-time financial data integration.<br>
+        • Managed dynamic NoSQL storage for user portfolios and authentication.
+    </div>
+</div>
+<div class="project-item">
+    <a href="https://github.com/roomfulmoshe/Front-End-React-Chatting-App.git" target="_blank" class="project-title">Chatify</a>
+    <div class="project-tech">React.js, Node.js, Socket.io</div>
+    <div class="project-desc">
+        • Real-time messaging workspace supporting file sharing and message reactions.
+    </div>
+</div>`
+            },
+            resume: {
+                desc: "Resume Preview",
+                fn: () => `
+<div class="section-header">Resume Preview</div>
+<div>Opening resume for <strong>${data.name}</strong>...</div>
+<br>
+<div><strong>EXPERIENCE</strong></div>
+<div>
+• <strong>Software Developer @ Dashline</strong> (2025–Present)<br>
+&nbsp;&nbsp;Building autonomous AI agents and ETL pipelines.<br>
+• <strong>Technical Operations Engineer @ Thryve Teams</strong> (2024–2025)<br>
+&nbsp;&nbsp;Node.js/Fastify automation saving 100+ hrs/week.<br>
+• <strong>Software Dev Intern @ Roomful</strong> (2023)<br>
+&nbsp;&nbsp;OpenAI integration, 3D metaverse env data training.<br>
+</div>
+<br>
+<div><strong>EDUCATION</strong></div>
+<div>
+• <strong>Georgia Institute of Technology</strong> - MS Computer Science (Exp. 2027)<br>
+• <strong>CUNY Queens College</strong> - BA Computer Science (3.99 GPA)<br>
+</div>
+<br>
+<div>
+    <a href="${data.resumeUrl}" target="_blank" style="color:var(--accent); font-weight:bold;">[ Download Full PDF Resume ]</a>
+</div>`
+            },
+            contact: {
+                desc: "Get in touch",
+                fn: () => `
+<div class="section-header">Contact</div>
+<div>Let's connect!</div>
+<br>
+<div>• <strong>Email:</strong> <a href="mailto:${data.email}">${data.email}</a></div>
+<div>• <strong>LinkedIn:</strong> <a href="${data.linkedin}" target="_blank">linkedin.com/in/mosheshtaygrud</a></div>
+<div>• <strong>GitHub:</strong> <a href="${data.github}" target="_blank">github.com/roomfulmoshe</a></div>`
+            },
+            theme: {
+                desc: "Toggle Theme",
+                fn: () => {
+                    const body = document.body;
+                    if (body.classList.contains('theme-light')) {
+                        body.classList.remove('theme-light');
+                        body.classList.add('theme-dark');
+                        localStorage.setItem('theme', 'dark');
+                        return "Switched to Dark Mode.";
+                    } else {
+                        body.classList.remove('theme-dark');
+                        body.classList.add('theme-light');
+                        localStorage.setItem('theme', 'light');
+                        return "Switched to Light Mode.";
+                    }
+                }
+            },
+            clear: { desc: "Clear terminal", fn: () => "" }
+        };
+
+        function init() {
+            updateClock();
+            setInterval(updateClock, 60000);
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'dark') {
+                document.body.classList.replace('theme-light', 'theme-dark');
+            }
+            print(commands.home.fn());
+            print(`<div>Type <span style="color:var(--accent)">help</span> to see available commands.</div>`);
+
+            // Start the Fake Mouse Loop if on desktop
+            if (window.innerWidth > 600) {
+                runFakeMouseLoop();
+            }
+        }
+
+        function updateClock() {
+            const now = new Date();
+            let hours = now.getHours();
+            const minutes = now.getMinutes().toString().padStart(2, '0');
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            hours = hours % 12;
+            hours = hours ? hours : 12;
+            document.getElementById('clock').textContent = `${hours}:${minutes} ${ampm}`;
+        }
+
+        function print(html) {
+            const outputDiv = document.createElement('div');
+            outputDiv.className = 'output-line';
+            outputDiv.innerHTML = html;
+            terminalBody.insertBefore(outputDiv, inputLine);
+            scrollToBottom();
+        }
+
+        function scrollToBottom() {
+            terminalBody.scrollTop = terminalBody.scrollHeight;
+        }
+
+        function focusTerminal() {
+            cmdInput.focus();
+        }
+
+        window.focusTerminal = focusTerminal;
+        window.runCommand = function (cmdName) {
+            cmdInput.value = cmdName;
+            handleCommand();
+            focusTerminal();
+        };
+
+        function handleCommand() {
+            const rawInput = cmdInput.value.trim();
+            if (!rawInput) return;
+            const cmdDisplay = document.createElement('div');
+            cmdDisplay.className = 'output-line';
+            cmdDisplay.innerHTML = `<span class="prompt">visitor@moshe-portfolio %</span> <span class="command-entered">${rawInput}</span>`;
+            terminalBody.insertBefore(cmdDisplay, inputLine);
+            history.push(rawInput);
+            historyIndex = history.length;
+            const cmd = rawInput.toLowerCase();
+            if (cmd === 'clear') {
+                const outputs = terminalBody.querySelectorAll('.output-line');
+                outputs.forEach(el => el.remove());
+                cmdInput.value = '';
+                return;
+            }
+            if (commands[cmd]) {
+                const response = commands[cmd].fn();
+                if (response) print(response);
+            } else {
+                print(`<div>command not found: ${rawInput}</div><div>Type <span style="color:var(--accent)">help</span> for options.</div>`);
+            }
+            cmdInput.value = '';
+            scrollToBottom();
+        }
+
+        cmdInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') handleCommand();
+            else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                if (historyIndex > 0) {
+                    historyIndex--;
+                    cmdInput.value = history[historyIndex];
+                }
+            } else if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                if (historyIndex < history.length - 1) {
+                    historyIndex++;
+                    cmdInput.value = history[historyIndex];
+                } else {
+                    historyIndex = history.length;
+                    cmdInput.value = '';
+                }
+            }
+        });
+
+        terminalBody.addEventListener('click', () => cmdInput.focus());
+
+        // --- Fake Mouse & Background Animation Logic ---
+
+        const cursor = document.getElementById('fake-cursor');
+
+        async function runFakeMouseLoop() {
+            const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+            // Mouse helper
+            async function moveTo(selector, offsetX = 10, offsetY = 10) {
+                const el = document.querySelector(selector);
+                if (!el) return;
+                const rect = el.getBoundingClientRect();
+                const x = rect.left + offsetX;
+                const y = rect.top + offsetY;
+                cursor.style.transform = `translate(${x}px, ${y}px)`;
+                await sleep(700); // Wait for transition
+            }
+
+            // Loop
+            while (true) {
+                if (window.innerWidth < 600) break;
+
+                // 1. VS Code: Type & Scroll
+                await moveTo('#vs-editor-content', 50, 80);
+                const vsEditor = document.getElementById('vs-editor-content');
+                const newCode = document.createElement('div');
+                newCode.className = 'code-line';
+                newCode.innerHTML = `<span class="kw">await</span> <span class="fn">fetchData</span>();`;
+                vsEditor.insertBefore(newCode, vsEditor.lastElementChild); // Insert before cursor
+                vsEditor.scrollTop = vsEditor.scrollHeight;
+                await sleep(500);
+
+                // 2. Drag VS Code Window
+                await moveTo('#vscode-app .bg-title-bar', 100, 10);
+                const vsApp = document.getElementById('vscode-app');
+                // Drag start visual
+                cursor.style.transform += ' scale(0.9)'; // simulated click
+                await sleep(200);
+                // Move window
+                vsApp.style.top = '7%';
+                vsApp.style.left = '3%';
+                // Move cursor with it (approximate)
+                await moveTo('#vscode-app .bg-title-bar', 100, 10);
+                await sleep(1000);
+                cursor.style.transform = cursor.style.transform.replace(' scale(0.9)', ''); // Release
+
+                // 3. Postman: Click Send
+                await moveTo('#pm-send-btn', 25, 12);
+                const btn = document.getElementById('pm-send-btn');
+                btn.classList.add('clicked');
+                await sleep(200);
+                btn.classList.remove('clicked');
+                await sleep(500);
+                // Update response
+                const resp = document.getElementById('pm-response');
+                resp.classList.add('highlight');
+                resp.innerText = `{\n  "status": "success",\n  "timestamp": ${Date.now()}\n}`;
+                await sleep(500);
+                resp.classList.remove('highlight');
+
+                // 4. SQL: New Query & Run
+                await moveTo('#sql-query-box', 30, 20);
+                const sqlBox = document.getElementById('sql-query-box');
+                sqlBox.innerText = "";
+                await sleep(300);
+                sqlBox.innerText = "SELECT COUNT(*) FROM users;";
+                await sleep(800);
+                // Run (visual flash on grid)
+                const grid = document.getElementById('sql-grid-box');
+                grid.classList.add('flash');
+                await sleep(200);
+                grid.classList.remove('flash');
+                // Add row
+                const newRow = document.createElement('div');
+                newRow.className = 'sql-row';
+                newRow.innerHTML = `<div class="sql-cell">104</div><div class="sql-cell">AI Agent</div><div class="sql-cell">Pending</div>`;
+                grid.appendChild(newRow);
+
+                // 5. DevTools: Console Log
+                await moveTo('#dt-console-box', 40, 40);
+                const consoleBox = document.getElementById('dt-console-box');
+                const log = document.createElement('div');
+                log.className = 'log-info';
+                log.innerHTML = `[debug] Background task finished.`;
+                consoleBox.appendChild(log);
+
+                // Return to neutral
+                cursor.style.transform = `translate(${window.innerWidth - 50}px, ${window.innerHeight - 50}px)`;
+
+                // Wait before next loop
+                await sleep(8000);
+
+                // Reset positions occasionally for sanity
+                vsApp.style.top = '5%';
+                vsApp.style.left = '2%';
+            }
+        }
+
+        init();
+    </script>
+</body>
+
+</html>
