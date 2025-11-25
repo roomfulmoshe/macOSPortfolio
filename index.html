@@ -7,8 +7,6 @@
     <title>Moshe Shtaygrud — Developer Portfolio</title>
     <meta name="description"
         content="Portfolio of Moshe Shtaygrud, Software Developer & Full Stack Engineer specialized in AI, Automation, and Finance.">
-    <meta property="og:title" content="Moshe Shtaygrud — Developer Portfolio">
-    <meta property="og:description" content="Interactive Terminal Portfolio.">
 
     <style>
         :root {
@@ -24,7 +22,7 @@
             --link-color: #4da6ff;
             --prompt-color: #27c93f;
 
-            /* App Specific Colors for Fake Windows */
+            /* App Specific Colors */
             --vscode-bg: #1e1e1e;
             --vscode-sidebar: #252526;
             --vscode-activity: #333333;
@@ -117,9 +115,7 @@
             width: 100%;
             height: 100%;
             z-index: 1;
-            /* Behind Terminal */
             pointer-events: none;
-            /* Non-interactive */
         }
 
         .bg-window {
@@ -130,19 +126,16 @@
             display: flex;
             flex-direction: column;
             overflow: hidden;
-            opacity: 0.7;
-            /* Slightly higher opacity for better visibility of fake interactions */
-            transition: opacity 0.3s ease, top 1s ease, left 1s ease;
-            /* For drag animation */
-            animation: bgFadeIn 1s ease-out;
+            opacity: 0.85;
+            /* Transition for the Agent dragging effect */
+            transition: transform 0.8s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.3s;
             border: 1px solid rgba(0, 0, 0, 0.1);
+            will-change: transform, top, left;
         }
 
-        /* Fake Window Chrome */
         .bg-title-bar {
             height: 24px;
             background: #e1e1e1;
-            /* Default light chrome */
             display: flex;
             align-items: center;
             padding-left: 8px;
@@ -182,10 +175,8 @@
 
         /* 1. VS Code */
         #vscode-app {
-            top: 5%;
-            left: 2%;
-            width: 45%;
-            height: 70%;
+            width: 600px;
+            height: 450px;
             background: var(--vscode-bg);
             color: #ccc;
         }
@@ -224,28 +215,34 @@
             background: #1e1e1e;
             color: #d4d4d4;
             overflow: hidden;
+            white-space: pre;
         }
 
         .code-line {
             margin-bottom: 2px;
-            white-space: pre;
+            height: 14px;
         }
 
         .kw {
             color: #569cd6;
         }
 
-        /* Keyword */
         .str {
             color: #ce9178;
         }
 
-        /* String */
         .fn {
             color: #dcdcaa;
         }
 
-        /* Function */
+        .cls {
+            color: #4ec9b0;
+        }
+
+        .cmt {
+            color: #6a9955;
+        }
+
         .blink-cursor {
             display: inline-block;
             width: 2px;
@@ -256,10 +253,8 @@
 
         /* 2. Postman */
         #postman-app {
-            top: 10%;
-            right: 2%;
-            width: 40%;
-            height: 50%;
+            width: 400px;
+            height: 350px;
             background: #fff;
         }
 
@@ -274,9 +269,10 @@
         }
 
         .pm-sidebar {
-            width: 100px;
+            width: 80px;
             background: #f0f0f0;
             border-right: 1px solid #ddd;
+            padding: 5px;
         }
 
         .pm-main {
@@ -299,6 +295,7 @@
             color: #ef5b25;
             font-weight: bold;
             font-size: 10px;
+            width: 30px;
         }
 
         .pm-input {
@@ -306,19 +303,17 @@
             background: #e6e6e6;
             height: 24px;
             border-radius: 4px;
+            padding-left: 5px;
+            line-height: 24px;
+            color: #333;
         }
 
         .pm-send {
-            width: 50px;
+            width: 40px;
             height: 24px;
             background: #0078d4;
             border-radius: 4px;
             transition: transform 0.1s;
-        }
-
-        .pm-send.clicked {
-            transform: scale(0.95);
-            background: #005a9e;
         }
 
         .pm-resp {
@@ -327,19 +322,13 @@
             font-family: monospace;
             color: #27c93f;
             overflow: hidden;
-        }
-
-        .pm-resp.highlight {
-            background: rgba(39, 201, 63, 0.1);
-            transition: background 0.2s;
+            background: #1e1e1e;
         }
 
         /* 3. SQL Client */
         #sql-app {
-            bottom: 5%;
-            left: 5%;
-            width: 35%;
-            height: 40%;
+            width: 450px;
+            height: 300px;
             background: #fff;
             color: #333;
             border: 1px solid #ccc;
@@ -364,12 +353,14 @@
         }
 
         .sql-query {
-            height: 40%;
+            height: 45%;
             border-bottom: 1px solid #ddd;
             padding: 5px;
             background: #fff;
             font-family: monospace;
             white-space: pre-wrap;
+            color: #333;
+            overflow: hidden;
         }
 
         .sql-grid {
@@ -381,6 +372,7 @@
 
         .sql-grid.flash {
             background: #e0f7fa;
+            transition: background 0.1s;
         }
 
         .sql-row {
@@ -400,10 +392,8 @@
 
         /* 4. DevTools */
         #devtools-app {
-            bottom: -2%;
-            right: 5%;
-            width: 45%;
-            height: 40%;
+            width: 500px;
+            height: 300px;
             background: var(--devtools-bg);
             color: #a8c7fa;
             font-size: 11px;
@@ -441,6 +431,26 @@
             overflow-y: hidden;
         }
 
+        .log-info {
+            color: #ccc;
+            border-bottom: 1px solid #333;
+            margin-bottom: 2px;
+        }
+
+        .log-warn {
+            color: #e6c07b;
+            border-bottom: 1px solid #333;
+            margin-bottom: 2px;
+            background: rgba(230, 192, 123, 0.1);
+        }
+
+        .log-error {
+            color: #ff5f56;
+            border-bottom: 1px solid #333;
+            margin-bottom: 2px;
+            background: rgba(255, 95, 86, 0.1);
+        }
+
         .tag {
             color: #569cd6;
         }
@@ -451,12 +461,6 @@
 
         .val {
             color: #ce9178;
-        }
-
-        .log-info {
-            color: #ccc;
-            border-bottom: 1px solid #333;
-            margin-bottom: 2px;
         }
 
         /* --- Fake Mouse --- */
@@ -471,6 +475,7 @@
             pointer-events: none;
             transition: transform 0.6s cubic-bezier(0.25, 0.1, 0.25, 1);
             filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.4));
+            transform-origin: top left;
         }
 
         #fake-cursor svg {
@@ -481,42 +486,23 @@
             stroke-width: 1px;
         }
 
-        @keyframes blink {
-            50% {
-                opacity: 0;
-            }
-        }
-
-        @keyframes bgFadeIn {
-            from {
-                opacity: 0;
-                transform: scale(0.98) translateY(10px);
-            }
-
-            to {
-                opacity: 0.7;
-                transform: scale(1) translateY(0);
-            }
-        }
-
-        /* Main Terminal (Original) */
+        /* Main Terminal */
         #terminal-window {
             width: 800px;
             height: 500px;
             background-color: var(--term-bg);
             border-radius: 8px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
             display: flex;
             flex-direction: column;
             overflow: hidden;
             font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
             border: 1px solid rgba(0, 0, 0, 0.1);
-            animation: fadeIn 0.4s ease-out;
             max-width: 95%;
             max-height: 80%;
             z-index: 10;
-            /* Above Fake Mouse */
             position: relative;
+            animation: fadeIn 0.4s ease-out;
         }
 
         .window-bar {
@@ -587,33 +573,12 @@
             font-weight: bold;
         }
 
+        /* Terminal Content Styles */
         .welcome-banner {
             color: var(--accent);
             font-weight: bold;
             margin-bottom: 15px;
             white-space: pre-wrap;
-        }
-
-        .help-table {
-            display: table;
-            width: 100%;
-            margin-top: 10px;
-        }
-
-        .help-row {
-            display: table-row;
-        }
-
-        .help-cmd {
-            display: table-cell;
-            width: 100px;
-            color: var(--accent);
-            padding-bottom: 4px;
-        }
-
-        .help-desc {
-            display: table-cell;
-            padding-bottom: 4px;
         }
 
         .section-header {
@@ -656,6 +621,28 @@
 
         a:hover {
             text-decoration: underline;
+        }
+
+        .help-table {
+            display: table;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .help-row {
+            display: table-row;
+        }
+
+        .help-cmd {
+            display: table-cell;
+            width: 100px;
+            color: var(--accent);
+            padding-bottom: 4px;
+        }
+
+        .help-desc {
+            display: table-cell;
+            padding-bottom: 4px;
         }
 
         .input-line {
@@ -728,6 +715,12 @@
             opacity: 1;
         }
 
+        @keyframes blink {
+            50% {
+                opacity: 0;
+            }
+        }
+
         @keyframes fadeIn {
             from {
                 opacity: 0;
@@ -752,7 +745,10 @@
                 display: none !important;
             }
 
-            /* Hide complex bg & mouse on mobile */
+            #menubar {
+                font-size: 12px;
+            }
+
             .help-cmd {
                 display: block;
                 width: auto;
@@ -762,10 +758,6 @@
             .help-row {
                 display: block;
                 margin-bottom: 8px;
-            }
-
-            #menubar {
-                font-size: 12px;
             }
         }
     </style>
@@ -805,7 +797,7 @@
                 <div class="bg-title-bar">
                     <div class="bg-dot r"></div>
                     <div class="bg-dot y"></div>
-                    <div class="bg-dot g"></div><span>portfolio - Visual Studio Code</span>
+                    <div class="bg-dot g"></div><span>pytorch_model.py - Visual Studio Code</span>
                 </div>
                 <div class="bg-content">
                     <div class="vs-activity">
@@ -815,27 +807,17 @@
                     </div>
                     <div class="vs-sidebar">
                         <div style="color:#bbb; font-weight:bold; margin-bottom:5px;">EXPLORER</div>
-                        <div style="color:#ccc;">> PORTFOLIO</div>
-                        <div style="padding-left:10px; color:#569cd6;">📄 index.html</div>
-                        <div style="padding-left:10px; color:#d4d4d4;">📄 style.css</div>
-                        <div style="padding-left:10px; color:#dcdcaa;">📄 app.js</div>
+                        <div style="color:#ccc;">> PROJECT</div>
+                        <div style="padding-left:10px; color:#569cd6;">📄 pytorch_model.py</div>
+                        <div style="padding-left:10px; color:#d4d4d4;">📄 data.csv</div>
                     </div>
                     <div id="vs-editor-content" class="vs-editor">
-                        <div class="code-line"><span class="kw">function</span> <span class="fn">initPortfolio</span>()
-                            {</div>
-                        <div class="code-line">&nbsp;&nbsp;<span class="kw">const</span> <span class="str">user</span> =
-                            <span class="str">"Moshe"</span>;</div>
-                        <div class="code-line">&nbsp;&nbsp;<span class="kw">if</span> (isDev) {</div>
-                        <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;console.<span class="fn">log</span>(<span
-                                class="str">"Ready..."</span>);</div>
-                        <div class="code-line">&nbsp;&nbsp;}</div>
-                        <div class="code-line">}</div>
                         <span class="blink-cursor"></span>
                     </div>
                 </div>
             </div>
 
-            <div id="postman-app" class="bg-window postman">
+            <div id="postman-app" class="bg-window postman dark-app">
                 <div class="bg-title-bar">
                     <div class="bg-dot r"></div>
                     <div class="bg-dot y"></div>
@@ -843,24 +825,17 @@
                 </div>
                 <div class="bg-content pm-layout">
                     <div class="pm-sidebar">
-                        <div style="padding:5px; border-bottom:1px solid #ddd;">Collections</div>
-                        <div style="padding:5px; color:#555;">📁 Users API</div>
-                        <div style="padding:5px; color:#555;">📁 Auth</div>
+                        <div style="padding:5px; border-bottom:1px solid #ddd; color:#333;">History</div>
+                        <div style="padding:5px; color:#555;">POST /train</div>
+                        <div style="padding:5px; color:#555;">GET /status</div>
                     </div>
                     <div class="pm-main">
                         <div class="pm-req-bar">
-                            <span class="pm-method">GET</span>
-                            <div class="pm-input"></div>
+                            <span id="pm-method-disp" class="pm-method">POST</span>
+                            <div id="pm-url-disp" class="pm-input">https://api.moshe.dev/v1/agent</div>
                             <div id="pm-send-btn" class="pm-send"></div>
                         </div>
-                        <div id="pm-response" class="pm-resp">
-                            <pre class="pm-resp-anim">{
-  "status": "ok",
-  "data": [
-    { "id": 1, "role": "dev" }
-  ]
-}</pre>
-                        </div>
+                        <div id="pm-response" class="pm-resp">{}</div>
                     </div>
                 </div>
             </div>
@@ -875,25 +850,15 @@
                     <div class="sql-tree">
                         <div>Servers</div>
                         <div style="padding-left:5px;">📂 Local</div>
-                        <div style="padding-left:10px;">🛢️ mydb</div>
+                        <div style="padding-left:10px;">🛢️ main_db</div>
                     </div>
                     <div class="sql-main">
-                        <div id="sql-query-box" class="sql-query">SELECT * FROM projects LIMIT 5;</div>
+                        <div id="sql-query-box" class="sql-query">-- Ready to run query...</div>
                         <div id="sql-grid-box" class="sql-grid">
                             <div class="sql-row" style="font-weight:bold; background:#eee;">
                                 <div class="sql-cell">id</div>
-                                <div class="sql-cell">name</div>
-                                <div class="sql-cell">status</div>
-                            </div>
-                            <div class="sql-row">
-                                <div class="sql-cell">101</div>
-                                <div class="sql-cell">VertiSite</div>
-                                <div class="sql-cell">Done</div>
-                            </div>
-                            <div class="sql-row">
-                                <div class="sql-cell">102</div>
-                                <div class="sql-cell">Dashline</div>
-                                <div class="sql-cell">Active</div>
+                                <div class="sql-cell">user</div>
+                                <div class="sql-cell">count</div>
                             </div>
                         </div>
                     </div>
@@ -916,16 +881,11 @@
                         <div id="dt-elements-box" class="dt-elements">
                             <div><span class="tag">&lt;body&gt;</span></div>
                             <div style="padding-left:10px;"><span class="tag">&lt;div</span> <span
-                                    class="attr">id</span>=<span class="val">"root"</span><span class="tag">&gt;</span>
+                                    class="attr">id</span>=<span class="val">"app"</span><span class="tag">&gt;</span>
                             </div>
-                            <div style="padding-left:20px;">...</div>
-                            <div style="padding-left:10px;"><span class="tag">&lt;/div&gt;</span></div>
-                            <div><span class="tag">&lt;/body&gt;</span></div>
                         </div>
                         <div id="dt-console-box" class="dt-console">
-                            <div class="log-info">[info] Loaded portfolio env...</div>
-                            <div class="log-info">[info] Terminal ready.</div>
-                            <div class="log-info" style="color:#e6c07b;">[warn] Low coffee levels.</div>
+                            <div class="log-info">[info] Environment initialized.</div>
                         </div>
                     </div>
                 </div>
@@ -953,32 +913,20 @@
     </div>
 
     <div id="dock">
-        <div class="dock-icon" onclick="focusTerminal()">
-            💻
-            <div class="dock-tooltip">Terminal</div>
+        <div class="dock-icon" onclick="focusTerminal()">💻<div class="dock-tooltip">Terminal</div>
         </div>
-        <div class="dock-icon" onclick="runCommand('home')">
-            🏠
-            <div class="dock-tooltip">Home</div>
+        <div class="dock-icon" onclick="runCommand('home')">🏠<div class="dock-tooltip">Home</div>
         </div>
-        <div class="dock-icon" onclick="runCommand('projects')">
-            🚀
-            <div class="dock-tooltip">Projects</div>
+        <div class="dock-icon" onclick="runCommand('projects')">🚀<div class="dock-tooltip">Projects</div>
         </div>
-        <div class="dock-icon" onclick="runCommand('resume')">
-            📄
-            <div class="dock-tooltip">Resume</div>
+        <div class="dock-icon" onclick="runCommand('resume')">📄<div class="dock-tooltip">Resume</div>
         </div>
-        <div class="dock-icon" onclick="runCommand('contact')">
-            ✉️
-            <div class="dock-tooltip">Contact</div>
+        <div class="dock-icon" onclick="runCommand('contact')">✉️<div class="dock-tooltip">Contact</div>
         </div>
     </div>
 
     <script>
-        /* Moshe Shtaygrud Portfolio */
-
-        // --- Data ---
+        // --- Portfolio Data ---
         const data = {
             name: "Moshe Shtaygrud",
             role: "Software Developer / Full Stack Engineer",
@@ -1138,32 +1086,6 @@
             clear: { desc: "Clear terminal", fn: () => "" }
         };
 
-        function init() {
-            updateClock();
-            setInterval(updateClock, 60000);
-            const savedTheme = localStorage.getItem('theme');
-            if (savedTheme === 'dark') {
-                document.body.classList.replace('theme-light', 'theme-dark');
-            }
-            print(commands.home.fn());
-            print(`<div>Type <span style="color:var(--accent)">help</span> to see available commands.</div>`);
-
-            // Start the Fake Mouse Loop if on desktop
-            if (window.innerWidth > 600) {
-                runFakeMouseLoop();
-            }
-        }
-
-        function updateClock() {
-            const now = new Date();
-            let hours = now.getHours();
-            const minutes = now.getMinutes().toString().padStart(2, '0');
-            const ampm = hours >= 12 ? 'PM' : 'AM';
-            hours = hours % 12;
-            hours = hours ? hours : 12;
-            document.getElementById('clock').textContent = `${hours}:${minutes} ${ampm}`;
-        }
-
         function print(html) {
             const outputDiv = document.createElement('div');
             outputDiv.className = 'output-line';
@@ -1179,13 +1101,6 @@
         function focusTerminal() {
             cmdInput.focus();
         }
-
-        window.focusTerminal = focusTerminal;
-        window.runCommand = function (cmdName) {
-            cmdInput.value = cmdName;
-            handleCommand();
-            focusTerminal();
-        };
 
         function handleCommand() {
             const rawInput = cmdInput.value.trim();
@@ -1213,6 +1128,13 @@
             scrollToBottom();
         }
 
+        window.focusTerminal = focusTerminal;
+        window.runCommand = function (cmdName) {
+            cmdInput.value = cmdName;
+            handleCommand();
+            focusTerminal();
+        };
+
         cmdInput.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') handleCommand();
             else if (e.key === 'ArrowUp') {
@@ -1235,102 +1157,291 @@
 
         terminalBody.addEventListener('click', () => cmdInput.focus());
 
-        // --- Fake Mouse & Background Animation Logic ---
+
+        // --- AUTONOMOUS AGENT SYSTEM (Background Logic) ---
+        // This simulates a user working in the background while the visitor uses the terminal.
 
         const cursor = document.getElementById('fake-cursor');
 
-        async function runFakeMouseLoop() {
-            const sleep = ms => new Promise(r => setTimeout(r, ms));
+        // Window State Tracking
+        const apps = {
+            vscode: { id: 'vscode-app', w: 600, h: 450, currentCorner: null },
+            postman: { id: 'postman-app', w: 400, h: 350, currentCorner: null },
+            sql: { id: 'sql-app', w: 450, h: 300, currentCorner: null },
+            devtools: { id: 'devtools-app', w: 500, h: 300, currentCorner: null }
+        };
 
-            // Mouse helper
-            async function moveTo(selector, offsetX = 10, offsetY = 10) {
-                const el = document.querySelector(selector);
-                if (!el) return;
-                const rect = el.getBoundingClientRect();
-                const x = rect.left + offsetX;
-                const y = rect.top + offsetY;
-                cursor.style.transform = `translate(${x}px, ${y}px)`;
-                await sleep(700); // Wait for transition
+        // Tracks which app is in which corner
+        let cornerOccupancy = {
+            topLeft: null,
+            topRight: null,
+            bottomLeft: null,
+            bottomRight: null
+        };
+
+        // Helper to calculate corner coordinates dynamically (responsive)
+        function getCornerCoordinates(corner, appW, appH) {
+            const padding = 20;
+            const menuHeight = 50;
+            const dockSpace = 100;
+
+            switch (corner) {
+                case 'topLeft': return { x: padding, y: menuHeight };
+                case 'topRight': return { x: window.innerWidth - appW - padding, y: menuHeight };
+                case 'bottomLeft': return { x: padding, y: window.innerHeight - appH - dockSpace };
+                case 'bottomRight': return { x: window.innerWidth - appW - padding, y: window.innerHeight - appH - dockSpace };
+                default: return { x: padding, y: menuHeight };
+            }
+        }
+
+        // Initialize App Positions
+        function initApps() {
+            const cornerKeys = Object.keys(cornerOccupancy);
+            const appKeys = Object.keys(apps);
+
+            appKeys.forEach((key, index) => {
+                const app = apps[key];
+                const el = document.getElementById(app.id);
+
+                // Distribute apps to corners in round-robin fashion for init
+                const cornerKey = cornerKeys[index % 4];
+
+                // Update state
+                cornerOccupancy[cornerKey] = key;
+                app.currentCorner = cornerKey;
+
+                const coords = getCornerCoordinates(cornerKey, app.w, app.h);
+                app.x = coords.x;
+                app.y = coords.y;
+
+                el.style.transform = `translate(${app.x}px, ${app.y}px)`;
+            });
+
+            if (window.innerWidth > 600) startAgent();
+        }
+
+        const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+        // --- Agent Mechanics ---
+
+        async function moveCursor(x, y) {
+            cursor.style.transform = `translate(${x}px, ${y}px)`;
+            await sleep(800); // Wait for transition
+        }
+
+        async function clickAt(x, y) {
+            await moveCursor(x, y);
+            cursor.style.transform = `translate(${x}px, ${y}px) scale(0.8)`;
+            await sleep(150);
+            cursor.style.transform = `translate(${x}px, ${y}px) scale(1)`;
+            await sleep(150);
+        }
+
+        async function dragWindow(appKey) {
+            const app = apps[appKey];
+            const el = document.getElementById(app.id);
+
+            // Target title bar
+            const titleX = app.x + 100;
+            const titleY = app.y + 12;
+
+            await moveCursor(titleX, titleY);
+
+            // "Grab"
+            cursor.style.transform = `translate(${titleX}px, ${titleY}px) scale(0.9)`;
+            el.style.transition = "none";
+            await sleep(100);
+
+            // Logic: Pick a new corner that isn't the current one
+            const cornerKeys = ['topLeft', 'topRight', 'bottomLeft', 'bottomRight'];
+
+            // Filter out current corner so we actually move the window
+            const candidates = cornerKeys.filter(k => k !== app.currentCorner);
+
+            // Try to find an empty corner among candidates
+            let targetCorner = candidates.find(k => cornerOccupancy[k] === null);
+
+            // If no empty corners, pick a random candidate
+            if (!targetCorner) {
+                targetCorner = candidates[Math.floor(Math.random() * candidates.length)];
             }
 
-            // Loop
-            while (true) {
-                if (window.innerWidth < 600) break;
+            // Update occupancy
+            if (app.currentCorner) {
+                if (cornerOccupancy[app.currentCorner] === appKey) {
+                    cornerOccupancy[app.currentCorner] = null;
+                }
+            }
+            cornerOccupancy[targetCorner] = appKey;
+            app.currentCorner = targetCorner;
 
-                // 1. VS Code: Type & Scroll
-                await moveTo('#vs-editor-content', 50, 80);
-                const vsEditor = document.getElementById('vs-editor-content');
-                const newCode = document.createElement('div');
-                newCode.className = 'code-line';
-                newCode.innerHTML = `<span class="kw">await</span> <span class="fn">fetchData</span>();`;
-                vsEditor.insertBefore(newCode, vsEditor.lastElementChild); // Insert before cursor
-                vsEditor.scrollTop = vsEditor.scrollHeight;
-                await sleep(500);
+            // Calculate coordinates
+            const targetCoords = getCornerCoordinates(targetCorner, app.w, app.h);
 
-                // 2. Drag VS Code Window
-                await moveTo('#vscode-app .bg-title-bar', 100, 10);
-                const vsApp = document.getElementById('vscode-app');
-                // Drag start visual
-                cursor.style.transform += ' scale(0.9)'; // simulated click
-                await sleep(200);
-                // Move window
-                vsApp.style.top = '7%';
-                vsApp.style.left = '3%';
-                // Move cursor with it (approximate)
-                await moveTo('#vscode-app .bg-title-bar', 100, 10);
-                await sleep(1000);
-                cursor.style.transform = cursor.style.transform.replace(' scale(0.9)', ''); // Release
+            // Animate manual drag
+            const steps = 25;
+            const dx = (targetCoords.x - app.x) / steps;
+            const dy = (targetCoords.y - app.y) / steps;
 
-                // 3. Postman: Click Send
-                await moveTo('#pm-send-btn', 25, 12);
-                const btn = document.getElementById('pm-send-btn');
-                btn.classList.add('clicked');
-                await sleep(200);
-                btn.classList.remove('clicked');
-                await sleep(500);
-                // Update response
-                const resp = document.getElementById('pm-response');
-                resp.classList.add('highlight');
-                resp.innerText = `{\n  "status": "success",\n  "timestamp": ${Date.now()}\n}`;
-                await sleep(500);
-                resp.classList.remove('highlight');
+            for (let i = 0; i < steps; i++) {
+                app.x += dx; app.y += dy;
+                // Move cursor with window
+                cursor.style.transform = `translate(${app.x + 100}px, ${app.y + 12}px) scale(0.9)`;
+                el.style.transform = `translate(${app.x}px, ${app.y}px)`;
+                await sleep(15);
+            }
 
-                // 4. SQL: New Query & Run
-                await moveTo('#sql-query-box', 30, 20);
-                const sqlBox = document.getElementById('sql-query-box');
-                sqlBox.innerText = "";
+            // Snap to exact final position
+            app.x = targetCoords.x;
+            app.y = targetCoords.y;
+            el.style.transform = `translate(${app.x}px, ${app.y}px)`;
+
+            // Release
+            cursor.style.transform = `translate(${app.x + 100}px, ${app.y + 12}px) scale(1)`;
+            el.style.transition = "transform 0.8s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.3s";
+            el.style.zIndex = getTopZ() + 1; // Bring to front of bg layer
+            await sleep(500);
+        }
+
+        let zIndexCounter = 2;
+        function getTopZ() { return zIndexCounter++; }
+
+        async function typeText(element, text, speed = 30) {
+            element.scrollTop = element.scrollHeight;
+            for (let char of text) {
+                if (char === '\n') {
+                    element.innerHTML += '<br>';
+                } else if (char === '\t') {
+                    element.innerHTML += '&nbsp;&nbsp;&nbsp;&nbsp;';
+                } else if (char === ' ') {
+                    element.innerHTML += '&nbsp;';
+                } else {
+                    element.innerHTML += char;
+                }
+                element.scrollTop = element.scrollHeight;
+                await sleep(Math.random() * speed + 10);
+            }
+        }
+
+        // --- Tasks ---
+
+        async function taskTrainNeural() {
+            await dragWindow('vscode');
+            const el = document.getElementById('vs-editor-content');
+
+            // Clear or Append? Let's append formatted code
+            const codeSnippet = `\n<span class="cmt"># Define simple neural net</span>\n<span class="kw">class</span> <span class="cls">TinyNet</span>(nn.Module):\n    <span class="kw">def</span> <span class="fn">__init__</span>(self):\n        super().__init__()\n        self.fc1 = nn.Linear(10, 32)\n`;
+
+            // Simulate typing by chunks
+            el.innerHTML += `<div class="code-line"><span class="cmt"># Training iteration...</span></div>`;
+            await sleep(500);
+            const lines = [
+                `<div class="code-line"><span class="kw">def</span> <span class="fn">forward</span>(self, x):</div>`,
+                `<div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;x = torch.relu(self.fc1(x))</div>`,
+                `<div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">return</span> self.fc2(x)</div>`,
+                `<div class="code-line"></div>`,
+                `<div class="code-line">optimizer.zero_grad()</div>`,
+                `<div class="code-line">loss.backward()</div>`
+            ];
+
+            for (let line of lines) {
+                el.innerHTML += line;
+                el.scrollTop = el.scrollHeight;
                 await sleep(300);
-                sqlBox.innerText = "SELECT COUNT(*) FROM users;";
-                await sleep(800);
-                // Run (visual flash on grid)
-                const grid = document.getElementById('sql-grid-box');
-                grid.classList.add('flash');
-                await sleep(200);
-                grid.classList.remove('flash');
-                // Add row
-                const newRow = document.createElement('div');
-                newRow.className = 'sql-row';
-                newRow.innerHTML = `<div class="sql-cell">104</div><div class="sql-cell">AI Agent</div><div class="sql-cell">Pending</div>`;
-                grid.appendChild(newRow);
-
-                // 5. DevTools: Console Log
-                await moveTo('#dt-console-box', 40, 40);
-                const consoleBox = document.getElementById('dt-console-box');
-                const log = document.createElement('div');
-                log.className = 'log-info';
-                log.innerHTML = `[debug] Background task finished.`;
-                consoleBox.appendChild(log);
-
-                // Return to neutral
-                cursor.style.transform = `translate(${window.innerWidth - 50}px, ${window.innerHeight - 50}px)`;
-
-                // Wait before next loop
-                await sleep(8000);
-
-                // Reset positions occasionally for sanity
-                vsApp.style.top = '5%';
-                vsApp.style.left = '2%';
             }
+        }
+
+        async function taskRunSQL() {
+            await dragWindow('sql');
+            const box = document.getElementById('sql-query-box');
+            box.innerText = ""; // Clear
+            await typeText(box, "SELECT u.name, COUNT(p.id) \nFROM users u \nJOIN projects p ON u.id = p.uid \nGROUP BY u.name;", 20);
+            await sleep(500);
+
+            // Run Button Click (Simulated by grid flash)
+            const grid = document.getElementById('sql-grid-box');
+            grid.classList.add('flash');
+            await sleep(200);
+            grid.classList.remove('flash');
+
+            // Add row
+            grid.innerHTML += `<div class="sql-row"><div class="sql-cell">${Math.floor(Math.random() * 100)}</div><div class="sql-cell">user_${Math.floor(Math.random() * 1000)}</div><div class="sql-cell">${Math.floor(Math.random() * 20)}</div></div>`;
+            grid.scrollTop = grid.scrollHeight;
+        }
+
+        async function taskPostman() {
+            await dragWindow('postman');
+            // Change Method
+            const methods = ['POST', 'GET', 'PUT'];
+            document.getElementById('pm-method-disp').innerText = methods[Math.floor(Math.random() * 3)];
+
+            // Click Send
+            const btn = document.getElementById('pm-send-btn');
+            await clickAt(apps.postman.x + 360, apps.postman.y + 60); // approx
+
+            // Response
+            const resp = document.getElementById('pm-response');
+            const json = `{\n  "loss": ${(Math.random()).toFixed(4)},\n  "epoch": ${Math.floor(Math.random() * 100)},\n  "status": "training"\n}`;
+            resp.innerText = json;
+        }
+
+        async function taskDevTools() {
+            await dragWindow('devtools');
+            const con = document.getElementById('dt-console-box');
+            const types = ['info', 'warn', 'error'];
+            const type = types[Math.floor(Math.random() * 3)];
+            const msgs = ['Gradient explosion ignored.', 'Batch 42 processed.', 'API latency high.', 'Render cycle complete.'];
+            const msg = msgs[Math.floor(Math.random() * msgs.length)];
+
+            con.innerHTML += `<div class="log-${type}">[${type}] ${msg}</div>`;
+            con.scrollTop = con.scrollHeight;
+        }
+
+        // --- Orchestrator ---
+
+        async function startAgent() {
+            const tasks = [taskTrainNeural, taskRunSQL, taskPostman, taskDevTools];
+
+            while (true) {
+                if (window.innerWidth < 600) break; // Stop on mobile
+
+                // Pick random task
+                const task = tasks[Math.floor(Math.random() * tasks.length)];
+
+                // Execute
+                await task();
+
+                // Park cursor in safe spot
+                await moveCursor(window.innerWidth - 100, window.innerHeight - 50);
+
+                // Wait 3-8 seconds
+                await sleep(3000 + Math.random() * 5000);
+            }
+        }
+
+        // --- Main Init ---
+        function init() {
+            updateClock();
+            setInterval(updateClock, 60000);
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'dark') {
+                document.body.classList.replace('theme-light', 'theme-dark');
+            }
+            print(commands.home.fn());
+            print(`<div>Type <span style="color:var(--accent)">help</span> to see available commands.</div>`);
+
+            // Initialize Background Apps and Agent
+            initApps();
+        }
+
+        function updateClock() {
+            const now = new Date();
+            let hours = now.getHours();
+            const minutes = now.getMinutes().toString().padStart(2, '0');
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            hours = hours % 12;
+            hours = hours ? hours : 12;
+            document.getElementById('clock').textContent = `${hours}:${minutes} ${ampm}`;
         }
 
         init();
