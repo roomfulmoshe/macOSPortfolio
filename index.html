@@ -8,6 +8,18 @@
     <meta name="description"
         content="Portfolio of Moshe Shtaygrud, Software Developer & Full Stack Engineer specialized in AI, Automation, and Finance.">
 
+    <script>
+        // Redirect to iOS mobile version if screen width is less than 768px
+        if (window.innerWidth <= 768) {
+            window.location.href = "mobile.html";
+        }
+
+        // Optional: Handle dynamic resizing on desktop for testing
+        window.addEventListener('resize', () => {
+            if (window.innerWidth <= 768) window.location.href = "mobile.html";
+        });
+    </script>
+
     <style>
         :root {
             --bg-color: #e0e5ec;
@@ -923,7 +935,7 @@
         </div>
         <div class="dock-icon" onclick="runCommand('contact')">✉️<div class="dock-tooltip">Contact</div>
         </div>
-    
+
         <div class="dock-icon" onclick="window.location.href='chess.html'">♟️
             <div class="dock-tooltip">Chess</div>
         </div>
