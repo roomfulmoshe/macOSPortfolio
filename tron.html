@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>NEON CYCLES</title>
+    <style>
+        :root {
+            --neon-blue: #00f3ff;
+            --neon-orange: #ff9d00;
+            --bg-dark: #050510;
+            --grid-line: rgba(0, 243, 255, 0.1);
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-dark);
+            color: white;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+            /* Prevent scrolling on mobile */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            touch-action: none;
+            /* Disable default touch actions */
+        }
+
+        #game-container {
+            position: relative;
+            box-shadow: 0 0 20px rgba(0, 243, 255, 0.2);
+            border: 2px solid var(--neon-blue);
+        }
+
+        canvas {
+            display: block;
+            background-color: #000;
+        }
+
+        /* UI Overlay */
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        h1 {
+            font-size: 3rem;
+            text-transform: uppercase;
+            letter-spacing: 5px;
+            color: #fff;
+            text-shadow: 0 0 10px var(--neon-blue), 0 0 20px var(--neon-blue);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        h2 {
+            font-size: 2rem;
+            color: #fff;
+            margin-bottom: 20px;
+        }
+
+        button {
+            background: transparent;
+            color: var(--neon-blue);
+            border: 2px solid var(--neon-blue);
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            cursor: pointer;
+            box-shadow: 0 0 10px var(--neon-blue);
+            transition: all 0.2s;
+        }
+
+        button:hover,
+        button:active {
+            background: var(--neon-blue);
+            color: #000;
+            box-shadow: 0 0 20px var(--neon-blue);
+        }
+
+        /* HUD */
+        #hud {
+            position: absolute;
+            top: 10px;
+            left: 0;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 20px;
+            box-sizing: border-box;
+            pointer-events: none;
+            font-size: 1.2rem;
+            font-weight: bold;
+            z-index: 5;
+            text-shadow: 0 0 5px currentColor;
+        }
+
+        .score-p1 {
+            color: var(--neon-blue);
+        }
+
+        .score-p2 {
+            color: var(--neon-orange);
+        }
+
+        /* On-Screen Controls */
+        #controls {
+            position: fixed;
+            /* Fixed relative to viewport */
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: grid;
+            grid-template-columns: 60px 60px 60px;
+            grid-template-rows: 60px 60px;
+            gap: 10px;
+            z-index: 20;
+            user-select: none;
+        }
+
+        .d-pad-btn {
+            width: 60px;
+            height: 60px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 2px solid var(--neon-blue);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: var(--neon-blue);
+            cursor: pointer;
+            box-shadow: 0 0 5px var(--neon-blue);
+            transition: background 0.1s;
+            touch-action: manipulation;
+        }
+
+        .d-pad-btn:active,
+        .d-pad-btn.pressed {
+            background: rgba(0, 243, 255, 0.3);
+            box-shadow: 0 0 15px var(--neon-blue);
+        }
+
+        /* Grid positioning for D-Pad */
+        #btn-up {
+            grid-column: 2;
+            grid-row: 1;
+        }
+
+        #btn-left {
+            grid-column: 1;
+            grid-row: 2;
+        }
+
+        #btn-down {
+            grid-column: 2;
+            grid-row: 2;
+        }
+
+        #btn-right {
+            grid-column: 3;
+            grid-row: 2;
+        }
+
+        @media (min-width: 768px) {
+
+            /* Move controls to corner on desktop/tablet */
+            #controls {
+                left: 20px;
+                bottom: 20px;
+                transform: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="game-container">
+        <canvas id="gameCanvas"></canvas>
+
+        <div id="hud">
+            <div class="score-p1">PLAYER: <span id="score1">0</span></div>
+            <div class="score-p2">CPU: <span id="score2">0</span></div>
+        </div>
+
+        <div id="start-screen" class="overlay">
+            <h1>NEON CYCLES</h1>
+            <button id="btn-start">Start Game</button>
+            <p style="margin-top:20px; color: #aaa; font-size: 0.9rem;">Arrow Keys or On-Screen Pad to Move</p>
+        </div>
+
+        <div id="game-over-screen" class="overlay hidden">
+            <h2 id="winner-text">GAME OVER</h2>
+            <button id="btn-restart">Play Again</button>
+        </div>
+    </div>
+
+    <div id="controls">
+        <div class="d-pad-btn" id="btn-up">▲</div>
+        <div class="d-pad-btn" id="btn-left">◀</div>
+        <div class="d-pad-btn" id="btn-down">▼</div>
+        <div class="d-pad-btn" id="btn-right">▶</div>
+    </div>
+
+    <script>
+        /**
+         * AUDIO SYSTEM (Web Audio API)
+         * Generates sounds synthetically to avoid external files.
+         */
+        const AudioSys = (function () {
+            let ctx = null;
+
+            function init() {
+                if (!ctx) {
+                    ctx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+            }
+
+            function playTone(freq, type, duration, vol) {
+                if (!ctx) return;
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, ctx.currentTime);
+
+                gain.gain.setValueAtTime(vol, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + duration);
+
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start();
+                osc.stop(ctx.currentTime + duration);
+            }
+
+            function playNoise(duration) {
+                if (!ctx) return;
+                const bufferSize = ctx.sampleRate * duration;
+                const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+                const data = buffer.getChannelData(0);
+                for (let i = 0; i < bufferSize; i++) {
+                    data[i] = Math.random() * 2 - 1;
+                }
+
+                const noise = ctx.createBufferSource();
+                noise.buffer = buffer;
+                const gain = ctx.createGain();
+                gain.gain.setValueAtTime(0.5, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + duration);
+
+                noise.connect(gain);
+                gain.connect(ctx.destination);
+                noise.start();
+            }
+
+            return {
+                init,
+                turn: () => playTone(300, 'square', 0.1, 0.1),
+                start: () => playTone(600, 'sine', 0.5, 0.2),
+                crash: () => playNoise(0.5)
+            };
+        })();
+
+        /**
+         * GAME CONSTANTS & SETUP
+         */
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const startScreen = document.getElementById('start-screen');
+        const gameOverScreen = document.getElementById('game-over-screen');
+        const winnerText = document.getElementById('winner-text');
+        const score1El = document.getElementById('score1');
+        const score2El = document.getElementById('score2');
+
+        // Grid settings
+        const CELL_SIZE = 10;
+        let COLS, ROWS;
+        let grid = []; // 2D array to track occupied cells: 0 = empty, 1 = occupied
+
+        // Game State
+        let animationId;
+        let lastTime = 0;
+        const FPS = 30; // Control game speed
+        const INTERVAL = 1000 / FPS;
+        let isGameOver = false;
+        let scores = { p1: 0, p2: 0 };
+
+        // Colors
+        const P1_COLOR = '#00f3ff';
+        const P2_COLOR = '#ff9d00';
+
+        /**
+         * BIKE CLASS
+         */
+        class Bike {
+            constructor(x, y, color, isAI) {
+                this.x = x;
+                this.y = y;
+                this.color = color;
+                this.isAI = isAI;
+                this.dx = 0;
+                this.dy = 0;
+                this.speed = 1;
+                this.dead = false;
+                this.nextDir = null; // Buffer next direction
+                this.hasMoved = false; // Check if game started moving
+            }
+
+            reset(x, y) {
+                this.x = x;
+                this.y = y;
+                this.dx = 0;
+                this.dy = 0;
+                this.dead = false;
+                this.nextDir = null;
+                this.hasMoved = false;
+            }
+
+            setDirection(dx, dy) {
+                // Prevent 180 turns
+                if (this.dx !== 0 && dx === -this.dx) return;
+                if (this.dy !== 0 && dy === -this.dy) return;
+
+                // Prevent moving into self immediately if stopped
+                if (!this.hasMoved) {
+                    this.hasMoved = true;
+                }
+
+                this.nextDir = { dx, dy };
+            }
+
+            update() {
+                if (this.dead) return;
+
+                // Apply buffered direction
+                if (this.nextDir) {
+                    // Only play sound if direction actually changes
+                    if (this.dx !== this.nextDir.dx || this.dy !== this.nextDir.dy) {
+                        if (this.hasMoved) AudioSys.turn();
+                    }
+                    this.dx = this.nextDir.dx;
+                    this.dy = this.nextDir.dy;
+                    this.nextDir = null;
+                }
+
+                if (this.dx === 0 && this.dy === 0) return;
+
+                // Calculate next position
+                const nextX = this.x + this.dx;
+                const nextY = this.y + this.dy;
+
+                // Collision Detection
+                if (this.checkCollision(nextX, nextY)) {
+                    this.dead = true;
+                    return;
+                }
+
+                // Move
+                this.x = nextX;
+                this.y = nextY;
+
+                // Mark grid
+                if (this.x >= 0 && this.x < COLS && this.y >= 0 && this.y < ROWS) {
+                    grid[this.y][this.x] = 1;
+                }
+            }
+
+            checkCollision(x, y) {
+                // Walls
+                if (x < 0 || x >= COLS || y < 0 || y >= ROWS) return true;
+                // Trails
+                if (grid[y][x] === 1) return true;
+                return false;
+            }
+
+            draw() {
+                ctx.fillStyle = this.color;
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = this.color;
+
+                // Draw Head
+                ctx.fillRect(this.x * CELL_SIZE, this.y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+
+                // Reset shadow for performance
+                ctx.shadowBlur = 0;
+            }
+        }
+
+        /**
+         * AI LOGIC
+         */
+        function updateAI(ai, opponent) {
+            if (ai.dead || isGameOver) return;
+
+            // Start moving if not already
+            if (!ai.hasMoved) {
+                ai.setDirection(-1, 0); // Start moving Left
+                return;
+            }
+
+            const headX = ai.x;
+            const headY = ai.y;
+            const nextX = headX + ai.dx;
+            const nextY = headY + ai.dy;
+
+            // 1. Check if immediate crash is imminent
+            let aboutToCrash = ai.checkCollision(nextX, nextY);
+
+            // 2. Simple Heuristics
+            // Possible moves: Up, Down, Left, Right
+            const moves = [
+                { dx: 0, dy: -1 }, // Up
+                { dx: 0, dy: 1 },  // Down
+                { dx: -1, dy: 0 }, // Left
+                { dx: 1, dy: 0 }   // Right
+            ];
+
+            // Filter valid moves (no 180s, no walls/trails)
+            let safeMoves = moves.filter(m => {
+                // No 180s
+                if (m.dx === -ai.dx && m.dy === -ai.dy) return false;
+
+                const tx = headX + m.dx;
+                const ty = headY + m.dy;
+                return !ai.checkCollision(tx, ty);
+            });
+
+            if (safeMoves.length === 0) {
+                // No moves? Accept fate
+                return;
+            }
+
+            // Logic: 
+            // If currently safe, keep going with high probability (95%) to avoid jitter
+            // If about to crash, forced to turn.
+            // Occasionally turn randomly to be aggressive or confused (5%)
+
+            const shouldTurn = aboutToCrash || Math.random() < 0.05;
+
+            if (shouldTurn) {
+                // Pick best safe move
+                // Simple metric: Closest to opponent or just Open Space?
+                // Let's count open space in each direction (Flood fill depth 3 is expensive in JS loop)
+                // Cheaper: Look 3 steps ahead
+
+                safeMoves.sort((a, b) => {
+                    const scoreA = scanAhead(ai, a.dx, a.dy);
+                    const scoreB = scanAhead(ai, b.dx, b.dy);
+                    return scoreB - scoreA; // Descending
+                });
+
+                // Pick the best one
+                const bestMove = safeMoves[0];
+                ai.setDirection(bestMove.dx, bestMove.dy);
+            }
+        }
+
+        function scanAhead(bike, dx, dy) {
+            let score = 0;
+            let cx = bike.x;
+            let cy = bike.y;
+            // Look up to 5 blocks ahead
+            for (let i = 0; i < 5; i++) {
+                cx += dx;
+                cy += dy;
+                if (bike.checkCollision(cx, cy)) break;
+                score++;
+            }
+            return score;
+        }
+
+        /**
+         * GAME ENGINE
+         */
+        let player = new Bike(0, 0, P1_COLOR, false);
+        let computer = new Bike(0, 0, P2_COLOR, true);
+
+        function resize() {
+            // Determine canvas size
+            const maxWidth = window.innerWidth - 40; // Margin
+            const maxHeight = window.innerHeight - 200; // Leave room for UI controls
+
+            // Snap to multiple of CELL_SIZE
+            const w = Math.floor(maxWidth / CELL_SIZE) * CELL_SIZE;
+            const h = Math.floor(maxHeight / CELL_SIZE) * CELL_SIZE;
+
+            canvas.width = w;
+            canvas.height = h;
+
+            COLS = w / CELL_SIZE;
+            ROWS = h / CELL_SIZE;
+        }
+
+        function initGame() {
+            AudioSys.init();
+            resize();
+
+            // Reset Grid
+            grid = [];
+            for (let y = 0; y < ROWS; y++) {
+                let row = [];
+                for (let x = 0; x < COLS; x++) {
+                    row.push(0);
+                }
+                grid.push(row);
+            }
+
+            // Positions: Player Left, CPU Right
+            const midY = Math.floor(ROWS / 2);
+            player.reset(10, midY);
+            computer.reset(COLS - 10, midY);
+
+            // Mark initial spots
+            grid[player.y][player.x] = 1;
+            grid[computer.y][computer.x] = 1;
+
+            // Start Player Moving Right, CPU Left (Wait for input actually, but setup direction)
+            player.setDirection(1, 0); // Player auto-starts right
+            computer.setDirection(-1, 0);
+
+            isGameOver = false;
+
+            AudioSys.start();
+            gameLoop(0);
+        }
+
+        function drawGrid() {
+            ctx.strokeStyle = 'rgba(0, 243, 255, 0.05)';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+
+            for (let x = 0; x <= canvas.width; x += CELL_SIZE * 2) { // Less dense for style
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, canvas.height);
+            }
+            for (let y = 0; y <= canvas.height; y += CELL_SIZE * 2) {
+                ctx.moveTo(0, y);
+                ctx.lineTo(canvas.width, y);
+            }
+            ctx.stroke();
+        }
+
+        function drawTrails() {
+            // Optimization: Instead of redrawing the whole grid every frame,
+            // we only draw the new heads. But for glow effects and consistency,
+            // we can iterate the grid or keep a list of trail segments.
+            // Given the grid is simple, let's just draw the occupied cells.
+
+            // To optimize: render to an offscreen canvas? 
+            // Actually, for a simple Tron game, clearing and redrawing grid rects is fine.
+            // Or even better: Do NOT clear the canvas fully. Only clear where needed?
+            // No, standard loop: Clear -> Draw Grid -> Draw Static Trails -> Draw Heads.
+
+            // Actually, drawing 2000 rects per frame is slow.
+            // Trick: Draw the new head onto the canvas and DO NOT clear the canvas. 
+            // Only fade it slightly? No, Tron needs solid walls.
+
+            // Approach: We don't clear the trail pixels. We only draw the new head.
+            // BUT we need to redraw the background grid?
+            // Let's use two layers logic implicitly.
+            // 1. Draw background color with low opacity? (Trails fade?) No, Tron trails stay.
+
+            // Best performant way for this constraint:
+            // Just draw the new rect of the player on top of the previous frame.
+            // Never clear rect.
+        }
+
+        // Revised Rendering for Performance + Style
+        // We will Clear Screen -> Draw Grid -> Draw all active grid points (Expensive?)
+        // Alternatively: Keep a path array for each bike.
+        // Let's keep it simple: Draw all occupied cells.
+        function render() {
+            // Clear
+            ctx.fillStyle = '#050510';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            drawGrid();
+
+            // Draw Trails from Grid
+            // Iterating 60x60 grid (3600 cells) is fast enough for JS.
+            ctx.shadowBlur = 5;
+
+            // To optimize, we won't scan the whole grid. We rely on the bike drawing its history?
+            // No, collisions rely on grid. Visuals should match grid.
+            // Let's optimize: Draw grid cells.
+
+            // Actually, drawing thousands of rects is heavy on mobile.
+            // Better: Draw trails using the Bike's history. 
+            // We didn't store history in Bike class to save memory, but we can just draw the grid.
+
+            // Let's just draw the active heads. 
+            // AND: We can rely on the "Don't Clear" trick? 
+            // If we don't clear, we lose the nice neon glow overlap or BG updates.
+
+            // Let's use `grid` to draw.
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.2)'; // Generic trail color (faded)
+            // Actually, we need to know WHO owns the trail for color.
+            // Let's change grid to store ID: 0=empty, 1=P1, 2=P2.
+        }
+
+        // RE-FACTOR BIKE for Drawing History (Better visual performance)
+        player.history = [];
+        computer.history = [];
+
+        // Monkey patch update to push history
+        const _update = Bike.prototype.update;
+        Bike.prototype.update = function () {
+            if (!this.dead && (this.dx !== 0 || this.dy !== 0)) {
+                this.history.push({ x: this.x, y: this.y });
+            }
+            _update.call(this);
+        }
+        // Monkey patch reset
+        const _reset = Bike.prototype.reset;
+        Bike.prototype.reset = function (x, y) {
+            _reset.call(this, x, y);
+            this.history = [];
+        }
+
+        function drawGame() {
+            // Clear screen
+            ctx.fillStyle = '#050510';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            drawGrid();
+
+            // Helper to draw a bike
+            const drawBikeObj = (b) => {
+                ctx.fillStyle = b.color;
+                ctx.shadowColor = b.color;
+                ctx.shadowBlur = 10;
+
+                // Draw Trail
+                for (let p of b.history) {
+                    ctx.fillRect(p.x * CELL_SIZE, p.y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+                }
+
+                // Draw Head (Brighter)
+                ctx.shadowBlur = 20;
+                ctx.fillStyle = '#fff'; // White hot center
+                ctx.fillRect(b.x * CELL_SIZE, b.y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+
+                // Restore color for next rect
+                ctx.fillStyle = b.color;
+                ctx.fillRect(b.x * CELL_SIZE, b.y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+                ctx.shadowBlur = 0;
+            };
+
+            drawBikeObj(player);
+            drawBikeObj(computer);
+        }
+
+        function checkGameOver() {
+            if (player.dead && computer.dead) {
+                // Tie (Head on collision)
+                endRound("DRAW - DOUBLE CRASH");
+            } else if (player.dead) {
+                scores.p2++;
+                endRound("CPU WINS");
+            } else if (computer.dead) {
+                scores.p1++;
+                endRound("YOU WIN");
+            }
+        }
+
+        function endRound(text) {
+            isGameOver = true;
+            AudioSys.crash();
+            winnerText.innerText = text;
+            score1El.innerText = scores.p1;
+            score2El.innerText = scores.p2;
+            gameOverScreen.classList.remove('hidden');
+            cancelAnimationFrame(animationId);
+        }
+
+        function gameLoop(timestamp) {
+            if (isGameOver) return;
+
+            if (timestamp - lastTime >= INTERVAL) {
+                updateAI(computer, player);
+
+                player.update();
+                computer.update();
+
+                checkGameOver();
+                drawGame();
+
+                lastTime = timestamp;
+            }
+
+            animationId = requestAnimationFrame(gameLoop);
+        }
+
+        /**
+         * CONTROLS
+         */
+        function handleInput(key) {
+            if (isGameOver) return;
+
+            switch (key) {
+                case 'ArrowUp':
+                case 'w':
+                    player.setDirection(0, -1); break;
+                case 'ArrowDown':
+                case 's':
+                    player.setDirection(0, 1); break;
+                case 'ArrowLeft':
+                case 'a':
+                    player.setDirection(-1, 0); break;
+                case 'ArrowRight':
+                case 'd':
+                    player.setDirection(1, 0); break;
+            }
+        }
+
+        window.addEventListener('keydown', (e) => {
+            if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].indexOf(e.code) > -1) {
+                e.preventDefault();
+            }
+            handleInput(e.key);
+        });
+
+        // UI Buttons
+        document.getElementById('btn-start').addEventListener('click', () => {
+            startScreen.classList.add('hidden');
+            initGame();
+        });
+
+        document.getElementById('btn-restart').addEventListener('click', () => {
+            gameOverScreen.classList.add('hidden');
+            initGame();
+        });
+
+        // On-Screen D-Pad
+        const dPadButtons = [
+            { id: 'btn-up', key: 'ArrowUp' },
+            { id: 'btn-down', key: 'ArrowDown' },
+            { id: 'btn-left', key: 'ArrowLeft' },
+            { id: 'btn-right', key: 'ArrowRight' }
+        ];
+
+        dPadButtons.forEach(btn => {
+            const el = document.getElementById(btn.id);
+
+            // Touch start
+            el.addEventListener('touchstart', (e) => {
+                e.preventDefault(); // prevent mouse emulation
+                el.classList.add('pressed');
+                handleInput(btn.key);
+            });
+
+            // Touch end
+            el.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                el.classList.remove('pressed');
+            });
+
+            // Mouse (for desktop testing of UI)
+            el.addEventListener('mousedown', (e) => {
+                el.classList.add('pressed');
+                handleInput(btn.key);
+            });
+            el.addEventListener('mouseup', () => el.classList.remove('pressed'));
+            el.addEventListener('mouseleave', () => el.classList.remove('pressed'));
+        });
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            // Only resize if game is not running or restart logic needed?
+            // For simplicity, we just update canvas, but grid logic might break if we don't reset.
+            // Ideally, pause game or just let it clip.
+            // We will just update canvas size visually but logic grid remains same until restart.
+        });
+
+    </script>
+</body>
+
+</html>

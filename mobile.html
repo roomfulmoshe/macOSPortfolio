@@ -8,10 +8,12 @@
     <title>Moshe iOS</title>
 
     <script>
-        // Desktop Redirection
+        // Smooth desktop redirect at 1024px
         function checkScreenSize() {
-            if (window.innerWidth > 768) {
-                window.location.href = "index.html";
+            if (window.innerWidth > 1024) {
+                document.body.style.transition = 'opacity 0.3s ease';
+                document.body.style.opacity = '0';
+                setTimeout(() => { window.location.href = 'index.html'; }, 320);
             }
         }
         checkScreenSize();
@@ -796,8 +798,8 @@
                         <div class="t-pill" style="background: var(--ios-green);"></div>
                         <div class="t-card-box">
                             <div class="t-role">Software Developer</div>
-                            <div class="t-loc">Dashline • Present</div>
-                            <div class="t-desc">Building autonomous NLP-to-SQL Agents using MCP & N8N.</div>
+                            <div class="t-loc">Dashline • Jun 2025 – Present</div>
+                            <div class="t-desc">Full-stack NL-to-SQL BI platform (Next.js, LangGraph, PostgreSQL, MCP). 90% fewer hallucinations via Human-in-the-Loop.</div>
                         </div>
                     </div>
 
@@ -814,11 +816,20 @@
                 <div class="timeline-section-title">HISTORY</div>
 
                 <div class="t-row">
+                    <div class="t-pill" style="background: #0f3460;"></div>
+                    <div class="t-card-box">
+                        <div class="t-role">Le Soo Launch</div>
+                        <div class="t-loc">Mar 2026</div>
+                        <div class="t-desc">Production e-commerce platform + driver delivery portal built with Next.js & Firebase.</div>
+                    </div>
+                </div>
+
+                <div class="t-row">
                     <div class="t-pill" style="background: var(--ios-orange);"></div>
                     <div class="t-card-box">
                         <div class="t-role">VertiSite Launch</div>
                         <div class="t-loc">Nov 2025</div>
-                        <div class="t-desc">Geospatial platform for Urban Air Mobility planning.</div>
+                        <div class="t-desc">Geospatial platform for Urban Air Mobility planning. 5M+ trip records processed.</div>
                     </div>
                 </div>
 
@@ -871,12 +882,24 @@
             <div class="projects-wrapper">
 
                 <div class="project-card">
+                    <div class="p-hero" style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);">🛍️</div>
+                    <div class="p-body">
+                        <div class="p-tag">FULL-STACK • NEXT.JS • FIREBASE • LOGISTICS</div>
+                        <div class="p-title">Le Soo — E-Commerce & Logistics</div>
+                        <div class="p-desc">Production e-commerce storefront + driver delivery portal. Features OAuth2/JWT auth, custom CRM, real-time inventory, and zero-cost address mapping.</div>
+                        <div class="p-actions">
+                            <a href="https://thelesoo.com" target="_blank" class="p-btn blue">Live Site</a>
+                            <a href="https://drivers.thelesoo.com" target="_blank" class="p-btn">Driver Portal</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="project-card">
                     <div class="p-hero" style="background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);">🚁</div>
                     <div class="p-body">
-                        <div class="p-tag">GEOSPATIAL • PYTHON • JavaScript • Pandas </div>
+                        <div class="p-tag">GEOSPATIAL • PYTHON • D3.JS • PANDAS</div>
                         <div class="p-title">VertiSite: UAM Planner</div>
-                        <div class="p-desc">Geospatial platform optimizing vertiport placement. Processed 5M+ trip
-                            records to model urban demand.</div>
+                        <div class="p-desc">Geospatial platform optimizing vertiport placement. Processed 5M+ trip records to model urban demand density.</div>
                         <div class="p-actions">
                             <a href="https://roomfulmoshe.github.io/VertiSite/visualize_greedy.html" target="_blank"
                                 class="p-btn blue">Live Demo</a>
@@ -888,10 +911,9 @@
                 <div class="project-card">
                     <div class="p-hero" style="background: linear-gradient(135deg, #96fbc4 0%, #f9f586 100%);">📈</div>
                     <div class="p-body">
-                        <div class="p-tag">FINTECH • JS</div>
-                        <div class="p-title">Stock Simulator</div>
-                        <div class="p-desc">Risk-free trading platform with real-time financial data, user auth, and
-                            NoSQL portfolio tracking.</div>
+                        <div class="p-tag">FINTECH • JAVASCRIPT • FIREBASE</div>
+                        <div class="p-title">Stock Market Simulator</div>
+                        <div class="p-desc">Risk-free paper trading with real-time financial data, user auth, and dynamic NoSQL portfolio tracking.</div>
                         <div class="p-actions">
                             <a href="https://roomfulmoshe.github.io/paper_trading_project/" target="_blank"
                                 class="p-btn blue">Play Now</a>
@@ -904,10 +926,9 @@
                 <div class="project-card">
                     <div class="p-hero" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">🤖</div>
                     <div class="p-body">
-                        <div class="p-tag">AI AGENTS • AWS</div>
-                        <div class="p-title">Autonomous SQL Agent</div>
-                        <div class="p-desc">Business context aware queries with dynamic schema interpretation.
-                            Automating data analysis.</div>
+                        <div class="p-tag">AI AGENTS • LANGGRAPH • AWS • MCP</div>
+                        <div class="p-title">NL-to-SQL BI Agent</div>
+                        <div class="p-desc">Context-aware multi-join SQL queries from plain English. Human-in-the-Loop verification cut hallucinations 90%. Auto-generates executive dashboards.</div>
                         <div class="p-actions">
                             <span class="p-btn" style="color:#999; cursor:default;">Internal Tool</span>
                         </div>
@@ -928,23 +949,22 @@
                 <div style="font-size:12px; color:#999; margin-bottom:5px;">Today</div>
                 <div style="font-size:17px; font-weight:700; margin-bottom:5px;">About Me</div>
                 <div style="font-size:16px; line-height:1.5;">
-                    I fell in love with what a few lines of code can do for the world. I harness the power of technology
-                    to create innovative solutions in <strong>AI, Blockchain, Automation, and Finance</strong>.<br><br>
-                    Currently, I'm a Software Developer at Dashline building autonomous NLP-to-SQL agents and pursuing
-                    my MSCS at Georgia Tech.
+                    I fell in love with what a few lines of code can do for the world. I build innovative solutions across <strong>AI Agents, Automation, Full-Stack, and Fintech</strong>.<br><br>
+                    Currently a Software Developer at <strong>Dashline</strong> building production NL-to-SQL BI platforms, and pursuing my <strong>MSCS at Georgia Tech</strong> (Expected 2027).<br><br>
+                    Independently launched <strong>Le Soo</strong> — a live e-commerce platform with a custom logistics driver portal.
                 </div>
             </div>
     
             <div class="note-card">
                 <div style="font-size:12px; color:#999; margin-bottom:5px;">Yesterday</div>
-                <div style="font-size:17px; font-weight:700; margin-bottom:5px;">Tech Stack Wishlist</div>
+                <div style="font-size:17px; font-weight:700; margin-bottom:5px;">Currently Exploring</div>
                 <div style="font-size:16px; line-height:1.5;">
-                    Deep diving into high-scale engineering concepts:<br><br>
-                    • <strong>RAG Pipelines:</strong> For smarter context retrieval.<br>
-                    • <strong>Quantization:</strong> Efficient Edge AI.<br>
-                    • <strong>Rust:</strong> For memory-safe systems.<br>
-                    • <strong>Distributed Systems:</strong> Kubernetes & AWS.<br>
-                    • <strong>Transofrmer Architecture:</strong> deep dive
+                    Deep diving into high-scale engineering:<br><br>
+                    • <strong>Transformer Architecture:</strong> Attention, fine-tuning, and RLHF.<br>
+                    • <strong>RAG Pipelines:</strong> Smarter context retrieval for agents.<br>
+                    • <strong>Rust:</strong> Memory-safe systems programming.<br>
+                    • <strong>Distributed Systems:</strong> Kubernetes & advanced AWS.<br>
+                    • <strong>Quantization:</strong> Efficient Edge AI deployment.
                 </div>
             </div>
         </div>
@@ -952,49 +972,120 @@
 
     <div id="app-settings" class="app-window">
         <div class="app-header">
-            <div class="app-title">Settings</div>
+            <div class="app-title">Profile</div>
             <button class="app-btn" onclick="closeAllApps()">Done</button>
         </div>
         <div class="app-content">
-            <div class="ios-list-header">System</div>
-            <div class="ios-list-group">
-                <div class="ios-item">
-                    <div class="ios-label">Name</div>
-                    <div class="ios-val">Moshe Shtaygrud</div>
-                </div>
-                <div class="ios-item">
-                    <div class="ios-label">Role</div>
-                    <div class="ios-val">Software Engineer</div>
-                </div>
+
+            <!-- Profile Header -->
+            <div style="background:linear-gradient(180deg,#f0f4ff,#fff);padding:28px 20px 20px;text-align:center;border-bottom:0.5px solid #ddd;">
+                <div style="width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,#5856d6,#007AFF);margin:0 auto 12px;display:flex;align-items:center;justify-content:center;font-size:32px;color:white;font-weight:700;">MS</div>
+                <div style="font-size:22px;font-weight:700;color:#000;">Moshe Shtaygrud</div>
+                <div style="font-size:14px;color:#666;margin-top:4px;">Software Developer &amp; Full Stack Engineer</div>
+                <div style="font-size:13px;color:#888;margin-top:2px;">New York, NY</div>
             </div>
 
-            <div class="ios-list-header">Skills Overview</div>
+            <!-- Contact -->
+            <div class="ios-list-header">Contact</div>
             <div class="ios-list-group">
-                <div class="ios-item">
-                    <div class="ios-label">Languages</div>
-                    <div class="ios-val" style="font-size:14px;">Python, SQL, JS, Deluge, Java, C++, HTML, CSS</div>
-                </div>
-                <div class="ios-item">
-                    <div class="ios-label">Frameworks</div>
-                    <div class="ios-val" style="font-size:14px;">React, Node, Flask, PyTorch</div>
-                </div>
-                <div class="ios-item">
-                    <div class="ios-label">Cloud/Tools</div>
-                    <div class="ios-val" style="font-size:14px;">AWS, Docker, Git, Linux</div>
-                </div>
+                <a href="mailto:mshtaygrud@gmail.com" class="ios-item">
+                    <div class="ios-label" style="color:var(--ios-blue);">Email</div>
+                    <div class="ios-val">mshtaygrud@gmail.com</div>
+                    <div class="ios-arrow">›</div>
+                </a>
+                <a href="tel:+18455129834" class="ios-item">
+                    <div class="ios-label" style="color:var(--ios-blue);">Phone</div>
+                    <div class="ios-val">(845) 512-9834</div>
+                    <div class="ios-arrow">›</div>
+                </a>
+                <a href="https://www.linkedin.com/in/mosheshtaygrud" target="_blank" class="ios-item">
+                    <div class="ios-label" style="color:#0077b5;">LinkedIn</div>
+                    <div class="ios-val">mosheshtaygrud</div>
+                    <div class="ios-arrow">›</div>
+                </a>
+                <a href="https://github.com/roomfulmoshe" target="_blank" class="ios-item">
+                    <div class="ios-label" style="color:#333;">GitHub</div>
+                    <div class="ios-val">@roomfulmoshe</div>
+                    <div class="ios-arrow">›</div>
+                </a>
             </div>
 
+            <!-- Education -->
             <div class="ios-list-header">Education</div>
             <div class="ios-list-group">
-                <div class="ios-item">
-                    <div class="ios-label">Georgia Tech</div>
-                    <div class="ios-val">MS CS (In Progress)</div>
+                <div class="ios-item" style="flex-direction:column;align-items:flex-start;gap:2px;">
+                    <div class="ios-label" style="font-weight:600;">Georgia Institute of Technology</div>
+                    <div style="font-size:14px;color:#555;">MS Computer Science &bull; GPA 3.7</div>
+                    <div style="font-size:13px;color:#999;">Expected May 2027 &bull; ML Specialization</div>
                 </div>
-                <div class="ios-item">
-                    <div class="ios-label">Queens College</div>
-                    <div class="ios-val">BA CS (Summa Cum Laude)</div>
+                <div class="ios-item" style="flex-direction:column;align-items:flex-start;gap:2px;">
+                    <div class="ios-label" style="font-weight:600;">CUNY Queens College</div>
+                    <div style="font-size:14px;color:#555;">BA Computer Science &bull; GPA 3.99</div>
+                    <div style="font-size:13px;color:#999;">May 2024 &bull; Summa Cum Laude</div>
                 </div>
             </div>
+
+            <!-- Languages -->
+            <div class="ios-list-header">Languages</div>
+            <div class="ios-list-group">
+                <div class="ios-item"><div class="ios-label">Python</div><div class="ios-val">Expert</div></div>
+                <div class="ios-item"><div class="ios-label">SQL</div><div class="ios-val">Expert</div></div>
+                <div class="ios-item"><div class="ios-label">JavaScript / TypeScript</div><div class="ios-val">Expert</div></div>
+                <div class="ios-item"><div class="ios-label">Java &amp; C++</div><div class="ios-val">Proficient</div></div>
+                <div class="ios-item"><div class="ios-label">HTML / CSS</div><div class="ios-val">Expert</div></div>
+                <div class="ios-item"><div class="ios-label">Deluge</div><div class="ios-val">Proficient</div></div>
+            </div>
+
+            <!-- Frameworks -->
+            <div class="ios-list-header">Frameworks &amp; Libraries</div>
+            <div class="ios-list-group">
+                <div class="ios-item"><div class="ios-label">Next.js &amp; React</div><div class="ios-val">Full-Stack</div></div>
+                <div class="ios-item"><div class="ios-label">Node.js (Express/Fastify)</div><div class="ios-val">Backend</div></div>
+                <div class="ios-item"><div class="ios-label">FastAPI &amp; Flask</div><div class="ios-val">Python APIs</div></div>
+                <div class="ios-item"><div class="ios-label">Tailwind CSS</div><div class="ios-val">Styling</div></div>
+                <div class="ios-item"><div class="ios-label">LangChain / LangGraph</div><div class="ios-val">AI Agents</div></div>
+                <div class="ios-item"><div class="ios-label">LangSmith</div><div class="ios-val">Observability</div></div>
+                <div class="ios-item"><div class="ios-label">PyTorch &amp; Scikit-learn</div><div class="ios-val">ML</div></div>
+                <div class="ios-item"><div class="ios-label">Pandas &amp; NumPy</div><div class="ios-val">Data</div></div>
+            </div>
+
+            <!-- Cloud & Tools -->
+            <div class="ios-list-header">Cloud &amp; Tools</div>
+            <div class="ios-list-group">
+                <div class="ios-item"><div class="ios-label">AWS (Aurora RDS, EC2)</div><div class="ios-val">Cloud</div></div>
+                <div class="ios-item"><div class="ios-label">GCP &amp; Azure</div><div class="ios-val">Cloud</div></div>
+                <div class="ios-item"><div class="ios-label">Firebase</div><div class="ios-val">BaaS</div></div>
+                <div class="ios-item"><div class="ios-label">Docker &amp; Linux</div><div class="ios-val">DevOps</div></div>
+                <div class="ios-item"><div class="ios-label">PostgreSQL &amp; MySQL</div><div class="ios-val">Databases</div></div>
+                <div class="ios-item"><div class="ios-label">Redis</div><div class="ios-val">Caching</div></div>
+                <div class="ios-item"><div class="ios-label">Claude Code</div><div class="ios-val">AI Dev</div></div>
+                <div class="ios-item"><div class="ios-label">Zoho Suite</div><div class="ios-val">CRM/Automation</div></div>
+            </div>
+
+            <!-- Awards -->
+            <div class="ios-list-header">Awards &amp; Honors</div>
+            <div class="ios-list-group">
+                <div class="ios-item" style="flex-direction:column;align-items:flex-start;gap:2px;">
+                    <div class="ios-label" style="font-weight:600;">Blackstone Launchpad Winner</div>
+                    <div style="font-size:13px;color:#999;">$1,600 &bull; Fintech startup &bull; Feb 2024</div>
+                </div>
+                <div class="ios-item"><div class="ios-label">4&times; Presidential Scholar</div><div class="ios-val">CUNY</div></div>
+                <div class="ios-item"><div class="ios-label">NYS Academic Scholarship</div><div class="ios-val">State</div></div>
+                <div class="ios-item"><div class="ios-label">Summa Cum Laude</div><div class="ios-val">3.99 GPA</div></div>
+            </div>
+
+            <!-- Coursework -->
+            <div class="ios-list-header">Relevant Coursework</div>
+            <div class="ios-list-group">
+                <div class="ios-item"><div class="ios-label">Machine Learning for Trading</div><div class="ios-val">Georgia Tech</div></div>
+                <div class="ios-item"><div class="ios-label">Intro to Information Security</div><div class="ios-val">Georgia Tech</div></div>
+                <div class="ios-item"><div class="ios-label">Data Visualization &amp; Analytics</div><div class="ios-val">Georgia Tech</div></div>
+                <div class="ios-item"><div class="ios-label">Algorithm Design &amp; Analysis</div><div class="ios-val">Queens</div></div>
+                <div class="ios-item"><div class="ios-label">Operating Systems</div><div class="ios-val">Queens</div></div>
+                <div class="ios-item"><div class="ios-label">Artificial Intelligence</div><div class="ios-val">Queens</div></div>
+                <div class="ios-item"><div class="ios-label">Database Systems</div><div class="ios-val">Queens</div></div>
+            </div>
+
         </div>
     </div>
 
