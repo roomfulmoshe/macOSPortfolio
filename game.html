@@ -341,7 +341,7 @@
     const isMobile = 'ontouchstart' in window || navigator.maxTouchPoints > 1;
     if (isMobile) {
         document.getElementById('ctrl-hint').innerHTML =
-            'DRAG — STEER YOUR SHIP<br>AUTO-FIRE ENABLED<br>COLLECT POWER-UPS TO SURVIVE';
+            'TOUCH &amp; HOLD — MOVE &amp; FIRE<br>DRAG FINGER — STEER YOUR SHIP<br>COLLECT POWER-UPS TO SURVIVE';
     }
 
     // Performance tier: no shadowBlur on mobile (huge GPU win)
@@ -443,7 +443,7 @@
     // ── Input ─────────────────────────────────────────
     const keys  = {};
     const mouse = { x: W/2, y: H/2, down: false };
-    let   drag  = null; // { startX, startY, playerX, playerY } for mobile relative drag
+    let touchTarget = null; // {x, y} — active touch position on mobile
 
     window.addEventListener('keydown', e => { keys[e.key.toLowerCase()] = true; });
     window.addEventListener('keyup',   e => { keys[e.key.toLowerCase()] = false; });
@@ -454,24 +454,23 @@
     canvas.addEventListener('pointerdown', e => {
         e.preventDefault();
         initAudio();
-        if (e.pointerType !== 'mouse' && player) {
-            drag = { startX: e.clientX, startY: e.clientY, playerX: player.x, playerY: player.y };
-        }
         mouse.x = e.clientX; mouse.y = e.clientY;
         mouse.down = true;
+        if (e.pointerType !== 'mouse') {
+            touchTarget = { x: e.clientX, y: e.clientY };
+        }
     }, { passive: false });
 
     canvas.addEventListener('pointermove', e => {
         e.preventDefault();
         mouse.x = e.clientX; mouse.y = e.clientY;
-        if (e.pointerType !== 'mouse' && drag && player && gameState === 'playing') {
-            player.x = clamp(drag.playerX + (e.clientX - drag.startX), player.r, W - player.r);
-            player.y = clamp(drag.playerY + (e.clientY - drag.startY), player.r, H - player.r);
+        if (e.pointerType !== 'mouse' && touchTarget) {
+            touchTarget = { x: e.clientX, y: e.clientY };
         }
     }, { passive: false });
 
-    canvas.addEventListener('pointerup',     e => { e.preventDefault(); drag = null; mouse.down = false; }, { passive: false });
-    canvas.addEventListener('pointercancel', e => { e.preventDefault(); drag = null; mouse.down = false; }, { passive: false });
+    canvas.addEventListener('pointerup',     e => { e.preventDefault(); touchTarget = null; mouse.down = false; }, { passive: false });
+    canvas.addEventListener('pointercancel', e => { e.preventDefault(); touchTarget = null; mouse.down = false; }, { passive: false });
 
     // ── Particles ─────────────────────────────────────
     let particles = [];
@@ -734,8 +733,9 @@
             let changed = false;
             for (const k in this.powers) { this.powers[k]--; if (this.powers[k]<=0) { delete this.powers[k]; changed=true; } }
             if (changed) renderPUBar();
-            // Keyboard movement (desktop)
+            // Movement
             if (!isMobile) {
+                // Desktop: WASD / arrow keys
                 const diag = ((keys['w']||keys['arrowup']||keys['s']||keys['arrowdown']) &&
                                (keys['a']||keys['arrowleft']||keys['d']||keys['arrowright'])) ? 0.707 : 1;
                 let tx=0, ty=0;
@@ -744,23 +744,30 @@
                 if (keys['a']||keys['arrowleft'])  tx -= this.speed*diag;
                 if (keys['d']||keys['arrowright']) tx += this.speed*diag;
                 this.vx = lerp(this.vx, tx, 0.22); this.vy = lerp(this.vy, ty, 0.22);
+            } else if (touchTarget) {
+                // Mobile: smoothly move ship toward touch point
+                const dx = touchTarget.x - this.x;
+                const dy = touchTarget.y - this.y;
+                const d  = Math.hypot(dx, dy);
+                if (d > 10) {
+                    this.vx = lerp(this.vx, (dx/d)*this.speed, 0.2);
+                    this.vy = lerp(this.vy, (dy/d)*this.speed, 0.2);
+                } else {
+                    this.vx *= 0.5; this.vy *= 0.5;
+                }
             } else {
-                this.vx *= 0.78; this.vy *= 0.78;
+                this.vx *= 0.75; this.vy *= 0.75;
             }
             this.x = clamp(this.x + this.vx, this.r, W - this.r);
             this.y = clamp(this.y + this.vy, this.r, H - this.r);
             // Trail
             this.trail.push({ x: this.x, y: this.y });
             if (this.trail.length > (isMobile ? 5 : 9)) this.trail.shift();
-            // Auto-fire
-            const wantFire = isMobile ? (enemies.length > 0) : mouse.down;
-            if (wantFire && this.shootCd <= 0 && gameState === 'playing') {
-                if (isMobile) {
-                    // Target nearest enemy
-                    let best = null, bd = Infinity;
-                    enemies.forEach(e => { const d = dist(this.x,this.y,e.x,e.y); if(d<bd){bd=d;best=e;} });
-                    if (best) this.fire(best.x, best.y);
-                } else {
+            // Fire: desktop = hold mouse button | mobile = active touch only
+            if (this.shootCd <= 0 && gameState === 'playing') {
+                if (isMobile && touchTarget) {
+                    this.fire(touchTarget.x, touchTarget.y);
+                } else if (!isMobile && mouse.down) {
                     this.fire(mouse.x, mouse.y);
                 }
             }
@@ -809,6 +816,8 @@
         // Aim angle: on mobile point at nearest enemy, on desktop point at mouse
         aimAngle() {
             if (isMobile) {
+                if (touchTarget) return Math.atan2(touchTarget.y - this.y, touchTarget.x - this.x);
+                // Idle: point at nearest enemy
                 let best = null, bd = Infinity;
                 enemies.forEach(e => { const d = dist(this.x,this.y,e.x,e.y); if(d<bd){bd=d;best=e;} });
                 return best ? Math.atan2(best.y - this.y, best.x - this.x) : -Math.PI/2;
