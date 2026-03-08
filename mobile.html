@@ -681,6 +681,13 @@
             </div>
             <span class="app-label">Black Jack</span>
         </div>
+
+        <div class="app-item" onclick="openApp('2048')">
+            <div class="icon-box" style="background:linear-gradient(135deg,#edcf72,#c8960a);">
+                <span style="font-size:22px;font-weight:900;color:white;font-family:-apple-system,sans-serif;text-shadow:0 1px 3px rgba(0,0,0,0.25);">2048</span>
+            </div>
+            <span class="app-label">2048</span>
+        </div>
     </div>
 
     <div id="app-game" class="app-window" style="background:#000;">
@@ -1087,6 +1094,16 @@
                 <div class="ios-item"><div class="ios-label">Database Systems</div><div class="ios-val">Queens</div></div>
             </div>
 
+        </div>
+    </div>
+
+    <div id="app-2048" class="app-window">
+        <div class="app-header" style="background:rgba(237,207,114,0.95);border-bottom:0.5px solid rgba(0,0,0,0.1);">
+            <div class="app-title" style="color:#5c4a00;">2048</div>
+            <button class="app-btn" onclick="closeAllApps()" style="color:#5c4a00;">Done</button>
+        </div>
+        <div class="app-content" style="overflow:hidden;">
+            <iframe src="2048.html" style="width:100%;height:100%;border:none;"></iframe>
         </div>
     </div>
 

@@ -1,0 +1,1131 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>2048 - Premium Edition</title>
+    <style>
+        /* ==========================================================================
+           1. CSS Variables & Theming
+           ========================================================================== */
+        :root {
+            /* Board sizing */
+            --grid-size: 4;
+            --cell-size: 20vmin;
+            --gap-size: 2.5vmin;
+            --board-padding: 2.5vmin;
+            --border-radius: 2vmin;
+
+            /* Light Theme Colors */
+            --bg-gradient-1: #e0c3fc;
+            --bg-gradient-2: #8ec5fc;
+            --board-bg: rgba(255, 255, 255, 0.25);
+            --board-border: rgba(255, 255, 255, 0.4);
+            --cell-bg: rgba(255, 255, 255, 0.3);
+            --text-main: #5c544b;
+            --text-light: #f9f6f2;
+            --panel-bg: rgba(255, 255, 255, 0.6);
+            --overlay-bg: rgba(255, 255, 255, 0.7);
+            --modal-bg: rgba(255, 255, 255, 0.85);
+            --btn-bg: #8f7a66;
+            --btn-hover: #9f8b77;
+        }
+
+        @media (min-width: 600px) {
+            :root {
+                --cell-size: 100px;
+                --gap-size: 15px;
+                --board-padding: 15px;
+                --border-radius: 12px;
+            }
+        }
+
+        body.dark-mode {
+            /* Dark Theme Colors */
+            --bg-gradient-1: #0f2027;
+            --bg-gradient-2: #203a43;
+            --board-bg: rgba(0, 0, 0, 0.35);
+            --board-border: rgba(255, 255, 255, 0.1);
+            --cell-bg: rgba(0, 0, 0, 0.4);
+            --text-main: #f9f6f2;
+            --panel-bg: rgba(0, 0, 0, 0.5);
+            --overlay-bg: rgba(0, 0, 0, 0.75);
+            --modal-bg: rgba(20, 30, 35, 0.85);
+            --btn-bg: #f59563;
+            --btn-hover: #f67c5f;
+        }
+
+        /* ==========================================================================
+           2. Global Setup & Typography
+           ========================================================================== */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: linear-gradient(135deg, var(--bg-gradient-1), var(--bg-gradient-2));
+            background-attachment: fixed;
+            color: var(--text-main);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            overflow: hidden;
+            transition: background 0.5s ease, color 0.5s ease;
+        }
+
+        canvas#confetti {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        /* ==========================================================================
+           3. UI Layout (Header, Controls, Scores)
+           ========================================================================== */
+        .container {
+            width: calc(var(--grid-size) * var(--cell-size) + (var(--grid-size) - 1) * var(--gap-size) + var(--board-padding) * 2);
+            max-width: 100%;
+            padding: 0 10px;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            font-size: 3rem;
+            font-weight: 800;
+            letter-spacing: -1px;
+            margin: 0;
+            line-height: 1;
+            text-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .scores-container {
+            display: flex;
+            gap: 10px;
+        }
+
+        .score-box {
+            background: var(--panel-bg);
+            backdrop-filter: blur(10px);
+            padding: 8px 15px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--board-border);
+            position: relative;
+        }
+
+        .score-label {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            font-weight: bold;
+            opacity: 0.7;
+        }
+
+        .score-value {
+            font-size: 1.4rem;
+            font-weight: bold;
+        }
+
+        .score-addition {
+            position: absolute;
+            right: 20px;
+            bottom: -10px;
+            color: #f67c5f;
+            font-size: 1.2rem;
+            font-weight: bold;
+            opacity: 0;
+            z-index: 100;
+            animation: move-up 0.6s ease-in;
+        }
+
+        @keyframes move-up {
+            0% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+
+            100% {
+                opacity: 0;
+                transform: translateY(-40px);
+            }
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .icon-btn-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        button {
+            background: var(--btn-bg);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 16px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        button:hover {
+            background: var(--btn-hover);
+            transform: translateY(-2px);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button.icon-btn {
+            padding: 10px;
+            border-radius: 50%;
+            width: 42px;
+            height: 42px;
+        }
+
+        button svg {
+            width: 18px;
+            height: 18px;
+            fill: currentColor;
+        }
+
+        /* ==========================================================================
+           4. Game Board & Grid Sizing
+           ========================================================================== */
+        .board-wrapper {
+            position: relative;
+        }
+
+        .board {
+            width: calc(var(--grid-size) * var(--cell-size) + (var(--grid-size) - 1) * var(--gap-size) + var(--board-padding) * 2);
+            height: calc(var(--grid-size) * var(--cell-size) + (var(--grid-size) - 1) * var(--gap-size) + var(--board-padding) * 2);
+            padding: var(--board-padding);
+            background: var(--board-bg);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid var(--board-border);
+            border-radius: calc(var(--border-radius) + 4px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            position: relative;
+            touch-action: none;
+            /* Crucial for custom swipe logic */
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(var(--grid-size), var(--cell-size));
+            grid-template-rows: repeat(var(--grid-size), var(--cell-size));
+            gap: var(--gap-size);
+        }
+
+        .grid-cell {
+            background: var(--cell-bg);
+            border-radius: var(--border-radius);
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+
+        /* ==========================================================================
+           5. Tile System & Animations
+           ========================================================================== */
+        .tile-container {
+            position: absolute;
+            top: var(--board-padding);
+            left: var(--board-padding);
+            width: calc(100% - var(--board-padding) * 2);
+            height: calc(100% - var(--board-padding) * 2);
+            pointer-events: none;
+        }
+
+        .tile {
+            position: absolute;
+            width: var(--cell-size);
+            height: var(--cell-size);
+            /* Physical slide animation via CSS transform variable bindings */
+            transform: translate(calc(var(--x) * (var(--cell-size) + var(--gap-size))),
+                    calc(var(--y) * (var(--cell-size) + var(--gap-size))));
+            transition: transform 0.15s ease-in-out;
+        }
+
+        .tile-inner {
+            width: 100%;
+            height: 100%;
+            border-radius: var(--border-radius);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #776e65;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            background: #eee4da;
+            transition: background 0.15s, color 0.15s, box-shadow 0.15s;
+        }
+
+        @media (max-width: 600px) {
+            .tile-inner {
+                font-size: 2rem;
+            }
+        }
+
+        /* Tile pop-in & merge animations */
+        .tile-new .tile-inner {
+            animation: pop-in 0.2s ease backwards;
+        }
+
+        .tile-merged .tile-inner {
+            animation: pop-merge 0.2s ease 0.1s backwards;
+        }
+
+        @keyframes pop-in {
+            0% {
+                transform: scale(0);
+                opacity: 0;
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        @keyframes pop-merge {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.2);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        /* Tile Colors */
+        .tile-2 .tile-inner {
+            background: #eee4da;
+            color: #776e65;
+        }
+
+        .tile-4 .tile-inner {
+            background: #ede0c8;
+            color: #776e65;
+        }
+
+        .tile-8 .tile-inner {
+            background: #f2b179;
+            color: var(--text-light);
+        }
+
+        .tile-16 .tile-inner {
+            background: #f59563;
+            color: var(--text-light);
+        }
+
+        .tile-32 .tile-inner {
+            background: #f67c5f;
+            color: var(--text-light);
+        }
+
+        .tile-64 .tile-inner {
+            background: #f65e3b;
+            color: var(--text-light);
+        }
+
+        /* Premium Glow Effects for High Tiles */
+        .tile-128 .tile-inner {
+            background: linear-gradient(135deg, #edcf72, #e5c358);
+            color: var(--text-light);
+            font-size: 2.2rem;
+            box-shadow: 0 0 20px 0 rgba(237, 207, 114, 0.4), inset 0 2px 0 rgba(255, 255, 255, 0.4);
+        }
+
+        .tile-256 .tile-inner {
+            background: linear-gradient(135deg, #edcc61, #e3b841);
+            color: var(--text-light);
+            font-size: 2.2rem;
+            box-shadow: 0 0 30px 0 rgba(237, 204, 97, 0.5), inset 0 2px 0 rgba(255, 255, 255, 0.4);
+        }
+
+        .tile-512 .tile-inner {
+            background: linear-gradient(135deg, #edc850, #e0b431);
+            color: var(--text-light);
+            font-size: 2.2rem;
+            box-shadow: 0 0 40px 0 rgba(237, 200, 80, 0.6), inset 0 2px 0 rgba(255, 255, 255, 0.4);
+        }
+
+        .tile-1024 .tile-inner,
+        .tile-2048 .tile-inner,
+        .tile-super .tile-inner {
+            background: linear-gradient(135deg, #edc53f, #dfaa20);
+            color: var(--text-light);
+            font-size: 1.8rem;
+            box-shadow: 0 0 50px 0 rgba(237, 197, 63, 0.8), inset 0 2px 0 rgba(255, 255, 255, 0.5);
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        @media (max-width: 600px) {
+
+            .tile-128 .tile-inner,
+            .tile-256 .tile-inner,
+            .tile-512 .tile-inner {
+                font-size: 1.6rem;
+            }
+
+            .tile-1024 .tile-inner,
+            .tile-2048 .tile-inner,
+            .tile-super .tile-inner {
+                font-size: 1.2rem;
+            }
+        }
+
+        /* ==========================================================================
+           6. Overlays (Tutorial, Game Over, Victory)
+           ========================================================================== */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(5px);
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 1;
+            transition: opacity 0.4s ease;
+        }
+
+        .overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .tutorial-box {
+            background: var(--modal-bg);
+            padding: 30px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--board-border);
+            transform: translateY(0);
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .overlay.hidden .tutorial-box {
+            transform: translateY(30px);
+        }
+
+        .tutorial-box h2 {
+            margin-bottom: 20px;
+            font-size: 2rem;
+            color: var(--text-main);
+        }
+
+        .tutorial-box p {
+            margin-bottom: 25px;
+            line-height: 1.6;
+            font-size: 1.1rem;
+            color: var(--text-main);
+            opacity: 0.9;
+        }
+
+        .tutorial-icons {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 25px;
+            padding: 15px;
+            background: var(--panel-bg);
+            border-radius: 12px;
+        }
+
+        .tutorial-icons div {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            flex: 1;
+        }
+
+        .tutorial-icons .icon {
+            font-size: 2.2rem;
+        }
+
+        .tutorial-icons span {
+            font-size: 0.85rem;
+            font-weight: bold;
+            color: var(--text-main);
+            opacity: 0.8;
+        }
+
+        .tutorial-box button {
+            width: 100%;
+            padding: 14px;
+            font-size: 1.1rem;
+            border-radius: 12px;
+        }
+
+        .game-message {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--overlay-bg);
+            backdrop-filter: blur(5px);
+            z-index: 100;
+            border-radius: calc(var(--border-radius) + 4px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s ease;
+        }
+
+        .game-message.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .game-message p {
+            font-size: 3rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .game-message .actions {
+            display: flex;
+            gap: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="confetti"></canvas>
+
+    <div id="tutorial-overlay" class="overlay">
+        <div class="tutorial-box">
+            <h2>How to Play</h2>
+            <div class="tutorial-icons">
+                <div>
+                    <div class="icon">⌨️</div>
+                    <span>Desktop<br>Arrow Keys or WASD</span>
+                </div>
+                <div>
+                    <div class="icon">👆</div>
+                    <span>Mobile<br>Swipe the board</span>
+                </div>
+            </div>
+            <p>Slide the tiles. When two tiles with the same number touch, they <strong>merge into one!</strong> Reach
+                <strong>2048</strong> to win.</p>
+            <button id="close-tutorial-btn">Let's Play</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <header>
+            <h1>2048</h1>
+            <div class="scores-container">
+                <div class="score-box">
+                    <div class="score-label">Score</div>
+                    <div class="score-value" id="score">0</div>
+                </div>
+                <div class="score-box">
+                    <div class="score-label">Best</div>
+                    <div class="score-value" id="best-score">0</div>
+                </div>
+            </div>
+        </header>
+
+        <div class="controls">
+            <button id="restart-btn">
+                <svg viewBox="0 0 24 24">
+                    <path
+                        d="M17.65 6.35A7.958 7.958 0 0012 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0112 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z" />
+                </svg>
+                New Game
+            </button>
+            <div class="icon-btn-group">
+                <button class="icon-btn" id="undo-btn" title="Undo">
+                    <svg viewBox="0 0 24 24">
+                        <path
+                            d="M12.5 8c-2.65 0-5.05.99-6.9 2.6L2 7v9h9l-3.62-3.62c1.39-1.16 3.16-1.88 5.12-1.88 3.54 0 6.55 2.31 7.6 5.5l2.37-.78C21.08 11.03 17.15 8 12.5 8z" />
+                    </svg>
+                </button>
+                <button class="icon-btn" id="sound-btn" title="Toggle Sound">
+                    <svg viewBox="0 0 24 24" id="sound-icon">
+                        <path
+                            d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z" />
+                    </svg>
+                </button>
+                <button class="icon-btn" id="theme-btn" title="Toggle Theme">
+                    <svg viewBox="0 0 24 24" id="theme-icon">
+                        <path
+                            d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 01-4.4 2.26 5.403 5.403 0 01-3.14-9.8C12.18 3.05 12.09 3 12 3z" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <div class="board-wrapper">
+            <div class="board" id="board">
+                <div class="grid">
+                    <div class="grid-cell"></div>
+                    <div class="grid-cell"></div>
+                    <div class="grid-cell"></div>
+                    <div class="grid-cell"></div>
+                    <div class="grid-cell"></div>
+                    <div class="grid-cell"></div>
+                    <div class="grid-cell"></div>
+                    <div class="grid-cell"></div>
+                    <div class="grid-cell"></div>
+                    <div class="grid-cell"></div>
+                    <div class="grid-cell"></div>
+                    <div class="grid-cell"></div>
+                    <div class="grid-cell"></div>
+                    <div class="grid-cell"></div>
+                    <div class="grid-cell"></div>
+                    <div class="grid-cell"></div>
+                </div>
+                <div class="tile-container" id="tile-container">
+                </div>
+
+                <div class="game-message" id="game-message">
+                    <p id="message-text">Game Over!</p>
+                    <div class="actions">
+                        <button id="retry-msg-btn">Try Again</button>
+                        <button id="keep-playing-btn" style="display:none">Keep Playing</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* ==========================================================================
+           1. Audio Engine (Web Audio API Synth)
+           ========================================================================== */
+        const AudioEngine = (() => {
+            let ctx = null;
+            let enabled = true;
+
+            const init = () => {
+                if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
+                if (ctx.state === 'suspended') ctx.resume();
+            };
+
+            const toggle = () => enabled = !enabled;
+
+            const play = (type) => {
+                if (!enabled || !ctx) return;
+                const now = ctx.currentTime;
+
+                if (type === 'move') {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(200, now);
+                    osc.frequency.exponentialRampToValueAtTime(100, now + 0.1);
+                    gain.gain.setValueAtTime(0.05, now);
+                    gain.gain.linearRampToValueAtTime(0, now + 0.1);
+                    osc.connect(gain); gain.connect(ctx.destination);
+                    osc.start(now); osc.stop(now + 0.1);
+                } else if (type === 'merge') {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(400, now);
+                    osc.frequency.exponentialRampToValueAtTime(600, now + 0.15);
+                    gain.gain.setValueAtTime(0.1, now);
+                    gain.gain.linearRampToValueAtTime(0, now + 0.15);
+                    osc.connect(gain); gain.connect(ctx.destination);
+                    osc.start(now); osc.stop(now + 0.15);
+                } else if (type === 'win') {
+                    const freqs = [523.25, 659.25, 783.99, 1046.50]; // C Major Arp
+                    freqs.forEach((f, i) => {
+                        const o = ctx.createOscillator();
+                        const g = ctx.createGain();
+                        o.type = 'sine'; o.frequency.value = f;
+                        o.connect(g); g.connect(ctx.destination);
+                        g.gain.setValueAtTime(0, now + i * 0.1);
+                        g.gain.linearRampToValueAtTime(0.15, now + i * 0.1 + 0.05);
+                        g.gain.linearRampToValueAtTime(0, now + i * 0.1 + 0.4);
+                        o.start(now + i * 0.1); o.stop(now + i * 0.1 + 0.4);
+                    });
+                }
+            };
+
+            // Init audio context on first interaction
+            document.addEventListener('click', init, { once: true });
+            document.addEventListener('touchstart', init, { once: true });
+
+            return { play, toggle, get isEnabled() { return enabled; } };
+        })();
+
+        /* ==========================================================================
+           2. Particle System (Confetti on Win)
+           ========================================================================== */
+        const Particles = (() => {
+            const canvas = document.getElementById('confetti');
+            const ctx = canvas.getContext('2d');
+            let particles = [];
+            let animationId;
+
+            const resize = () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            };
+            window.addEventListener('resize', resize);
+            resize();
+
+            const fire = () => {
+                particles = [];
+                for (let i = 0; i < 150; i++) {
+                    particles.push({
+                        x: canvas.width / 2, y: canvas.height / 2 + 100,
+                        vx: (Math.random() - 0.5) * 25, vy: (Math.random() - 1) * 25 - 5,
+                        size: Math.random() * 8 + 4,
+                        color: `hsl(${Math.random() * 360}, 100%, 60%)`,
+                        rot: Math.random() * 360, rotSpeed: (Math.random() - 0.5) * 10
+                    });
+                }
+                if (!animationId) animate();
+            };
+
+            const animate = () => {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                let alive = false;
+                particles.forEach(p => {
+                    p.x += p.vx; p.y += p.vy; p.vy += 0.4; p.rot += p.rotSpeed;
+                    if (p.y < canvas.height) alive = true;
+                    ctx.save();
+                    ctx.translate(p.x, p.y);
+                    ctx.rotate(p.rot * Math.PI / 180);
+                    ctx.fillStyle = p.color;
+                    ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+                    ctx.restore();
+                });
+                if (alive) animationId = requestAnimationFrame(animate);
+                else { animationId = null; ctx.clearRect(0, 0, canvas.width, canvas.height); }
+            };
+
+            return { fire };
+        })();
+
+        /* ==========================================================================
+           3. Core Game Logic & State
+           ========================================================================== */
+        class Tile {
+            constructor(position, value) {
+                this.x = position.x;
+                this.y = position.y;
+                this.value = value;
+                this.id = 't_' + Math.random().toString(36).substr(2, 9);
+                this.previousPosition = null;
+                this.mergedFrom = null;
+                this.isNew = true;
+            }
+            savePosition() { this.previousPosition = { x: this.x, y: this.y }; }
+            updatePosition(pos) { this.x = pos.x; this.y = pos.y; }
+            clone() {
+                let t = new Tile({ x: this.x, y: this.y }, this.value);
+                t.id = this.id; t.isNew = false;
+                return t;
+            }
+        }
+
+        class GameManager {
+            constructor() {
+                this.size = 4;
+                this.grid = [];
+                this.score = 0;
+                this.bestScore = parseInt(localStorage.getItem('2048-best')) || 0;
+                this.history = []; // For Undo
+                this.won = false;
+                this.over = false;
+                this.keepPlaying = false;
+
+                this.tileContainer = document.getElementById('tile-container');
+                this.scoreEl = document.getElementById('score');
+                this.bestEl = document.getElementById('best-score');
+                this.msgEl = document.getElementById('game-message');
+                this.activeDOMNodes = {};
+
+                this.setup();
+            }
+
+            setup() {
+                this.grid = Array(this.size).fill().map(() => Array(this.size).fill(null));
+                this.score = 0;
+                this.won = false;
+                this.over = false;
+                this.keepPlaying = false;
+                this.history = [];
+                this.activeDOMNodes = {};
+                this.tileContainer.innerHTML = '';
+                this.msgEl.classList.remove('active');
+
+                this.addRandomTile();
+                this.addRandomTile();
+                this.updateUI();
+                this.actuate(); // Instantly render the first two tiles on load
+            }
+
+            saveState() {
+                const gridState = this.grid.map(row => row.map(t => t ? t.clone() : null));
+                this.history.push({ grid: gridState, score: this.score });
+                if (this.history.length > 2) this.history.shift(); // 1 step history
+            }
+
+            undo() {
+                if (this.history.length === 0 || this.over) return;
+                const state = this.history.pop();
+                this.grid = state.grid.map(row => row.map(t => t ? t.clone() : null));
+                this.score = state.score;
+                this.actuate();
+            }
+
+            addRandomTile() {
+                const emptyCells = [];
+                for (let x = 0; x < this.size; x++) {
+                    for (let y = 0; y < this.size; y++) {
+                        if (!this.grid[x][y]) emptyCells.push({ x, y });
+                    }
+                }
+                if (emptyCells.length === 0) return;
+                const spot = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+                this.grid[spot.x][spot.y] = new Tile(spot, Math.random() < 0.9 ? 2 : 4);
+            }
+
+            move(direction) {
+                if (this.over || (this.won && !this.keepPlaying)) return;
+
+                // 0: Up, 1: Right, 2: Down, 3: Left
+                const vectors = [{ x: 0, y: -1 }, { x: 1, y: 0 }, { x: 0, y: 1 }, { x: -1, y: 0 }];
+                const vec = vectors[direction];
+                let moved = false;
+                let mergedInTurn = false;
+
+                this.saveState();
+
+                // Prepare tiles (clear merge states, save positions)
+                for (let x = 0; x < this.size; x++) {
+                    for (let y = 0; y < this.size; y++) {
+                        if (this.grid[x][y]) {
+                            this.grid[x][y].mergedFrom = null;
+                            this.grid[x][y].isNew = false;
+                            this.grid[x][y].savePosition();
+                        }
+                    }
+                }
+
+                // Traversal order dictates merging order properly
+                const traversals = { x: [0, 1, 2, 3], y: [0, 1, 2, 3] };
+                if (vec.x === 1) traversals.x.reverse();
+                if (vec.y === 1) traversals.y.reverse();
+
+                traversals.x.forEach(x => {
+                    traversals.y.forEach(y => {
+                        let tile = this.grid[x][y];
+                        if (tile) {
+                            let curr = { x, y };
+                            let next = { x: x + vec.x, y: y + vec.y };
+
+                            // Find farthest
+                            while (this.withinBounds(next) && !this.grid[next.x][next.y]) {
+                                curr = { x: next.x, y: next.y };
+                                next = { x: next.x + vec.x, y: next.y + vec.y };
+                            }
+
+                            let nextTile = this.withinBounds(next) ? this.grid[next.x][next.y] : null;
+
+                            // Merge
+                            if (nextTile && nextTile.value === tile.value && !nextTile.mergedFrom) {
+                                let merged = new Tile({ x: next.x, y: next.y }, tile.value * 2);
+                                merged.mergedFrom = [tile, nextTile];
+
+                                this.grid[next.x][next.y] = merged;
+                                this.grid[x][y] = null;
+                                tile.updatePosition({ x: next.x, y: next.y }); // animate original
+
+                                this.score += merged.value;
+                                this.animateScore(merged.value);
+                                mergedInTurn = true;
+                                moved = true;
+
+                                if (merged.value === 2048 && !this.won) {
+                                    this.won = true;
+                                    Particles.fire();
+                                    AudioEngine.play('win');
+                                }
+                            } else if (curr.x !== x || curr.y !== y) {
+                                // Slide
+                                this.grid[curr.x][curr.y] = tile;
+                                this.grid[x][y] = null;
+                                tile.updatePosition(curr);
+                                moved = true;
+                            }
+                        }
+                    });
+                });
+
+                if (moved) {
+                    this.addRandomTile();
+                    AudioEngine.play(mergedInTurn ? 'merge' : 'move');
+                    if (!this.movesAvailable()) this.over = true;
+                    this.actuate();
+                } else {
+                    this.history.pop(); // Revert history if invalid move
+                }
+            }
+
+            withinBounds(pos) { return pos.x >= 0 && pos.x < this.size && pos.y >= 0 && pos.y < this.size; }
+
+            movesAvailable() {
+                for (let x = 0; x < this.size; x++) {
+                    for (let y = 0; y < this.size; y++) {
+                        if (!this.grid[x][y]) return true;
+                        let val = this.grid[x][y].value;
+                        if (x < this.size - 1 && this.grid[x + 1][y] && this.grid[x + 1][y].value === val) return true;
+                        if (y < this.size - 1 && this.grid[x][y + 1] && this.grid[x][y + 1].value === val) return true;
+                    }
+                }
+                return false;
+            }
+
+            /* ==========================================================================
+               4. DOM Rendering (Actuator)
+               ========================================================================== */
+            actuate() {
+                this.updateUI();
+
+                let currentTiles = [];
+                for (let x = 0; x < this.size; x++) {
+                    for (let y = 0; y < this.size; y++) {
+                        let t = this.grid[x][y];
+                        if (t) {
+                            currentTiles.push(t);
+                            if (t.mergedFrom) currentTiles.push(...t.mergedFrom);
+                        }
+                    }
+                }
+
+                // Remove stale DOM nodes
+                const currentIds = new Set(currentTiles.map(t => t.id));
+                for (let id in this.activeDOMNodes) {
+                    if (!currentIds.has(id)) {
+                        this.activeDOMNodes[id].remove();
+                        delete this.activeDOMNodes[id];
+                    }
+                }
+
+                // Render active nodes
+                currentTiles.forEach(tile => {
+                    let el = this.activeDOMNodes[tile.id];
+                    if (!el) {
+                        el = document.createElement('div');
+                        el.className = `tile`;
+                        const inner = document.createElement('div');
+                        inner.className = 'tile-inner';
+                        inner.textContent = tile.value;
+                        el.appendChild(inner);
+
+                        // Set class for color styling
+                        el.classList.add(`tile-${tile.value > 2048 ? 'super' : tile.value}`);
+
+                        this.tileContainer.appendChild(el);
+                        this.activeDOMNodes[tile.id] = el;
+
+                        // Set initial physical position
+                        const startPos = tile.previousPosition || { x: tile.x, y: tile.y };
+                        el.style.setProperty('--x', startPos.x);
+                        el.style.setProperty('--y', startPos.y);
+
+                        if (tile.isNew && !tile.mergedFrom) el.classList.add('tile-new');
+                    }
+
+                    // Force browser reflow to register initial position before transitioning
+                    void el.offsetWidth;
+
+                    // Trigger slide transition
+                    el.style.setProperty('--x', tile.x);
+                    el.style.setProperty('--y', tile.y);
+
+                    // Update states
+                    el.className = `tile tile-${tile.value > 2048 ? 'super' : tile.value}`;
+                    if (tile.isNew && !tile.mergedFrom) el.classList.add('tile-new');
+                    if (tile.mergedFrom) el.classList.add('tile-merged');
+
+                    // Z-index management for smooth merging
+                    if (currentTiles.some(t => t.mergedFrom && t.mergedFrom.includes(tile))) {
+                        el.style.zIndex = 10; // Sliding tiles
+                    } else {
+                        el.style.zIndex = tile.mergedFrom ? 12 : 11; // New merged tile on top
+                    }
+                });
+
+                // Handle Game Over / Win overlays
+                if (this.over) {
+                    this.showOverlay("Game Over!", false);
+                } else if (this.won && !this.keepPlaying) {
+                    this.showOverlay("You Win!", true);
+                }
+            }
+
+            updateUI() {
+                if (this.score > this.bestScore) {
+                    this.bestScore = this.score;
+                    localStorage.setItem('2048-best', this.bestScore);
+                }
+                this.scoreEl.textContent = this.score;
+                this.bestEl.textContent = this.bestScore;
+            }
+
+            animateScore(addition) {
+                const addEl = document.createElement('div');
+                addEl.className = 'score-addition';
+                addEl.textContent = '+' + addition;
+                this.scoreEl.parentElement.appendChild(addEl);
+                setTimeout(() => addEl.remove(), 600);
+            }
+
+            showOverlay(msg, isWin) {
+                setTimeout(() => {
+                    document.getElementById('message-text').textContent = msg;
+                    document.getElementById('keep-playing-btn').style.display = isWin ? 'block' : 'none';
+                    this.msgEl.classList.add('active');
+                }, 500); // Wait for animations to finish
+            }
+        }
+
+        /* ==========================================================================
+           5. App Initialization & Event Listeners
+           ========================================================================== */
+        document.addEventListener('DOMContentLoaded', () => {
+            const game = new GameManager();
+
+            // Tutorial Logic
+            const tutorialOverlay = document.getElementById('tutorial-overlay');
+            const closeBtn = document.getElementById('close-tutorial-btn');
+
+            // Auto hide if they already played before (optional, but requested on load so kept visible by default)
+            closeBtn.addEventListener('click', () => {
+                tutorialOverlay.classList.add('hidden');
+                // Ensure audio context is primed on first click
+                AudioEngine.play('move'); // Silent primer
+            });
+
+            // Keyboard Controls
+            document.addEventListener('keydown', (e) => {
+                // Ignore keys if tutorial is open
+                if (!tutorialOverlay.classList.contains('hidden') && e.key !== 'Enter' && e.key !== 'Escape') return;
+
+                if (e.key === 'Enter' || e.key === 'Escape') {
+                    tutorialOverlay.classList.add('hidden');
+                }
+
+                const map = { ArrowUp: 0, w: 0, ArrowRight: 1, d: 1, ArrowDown: 2, s: 2, ArrowLeft: 3, a: 3 };
+                if (map[e.key] !== undefined) {
+                    e.preventDefault();
+                    game.move(map[e.key]);
+                }
+            });
+
+            // Touch Swipe Controls
+            const board = document.getElementById('board');
+            let touchStart = null;
+
+            board.addEventListener('touchstart', (e) => {
+                if (!tutorialOverlay.classList.contains('hidden')) return;
+                if (e.touches.length > 1) return;
+                touchStart = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+                e.preventDefault(); // Prevent scroll while playing
+            }, { passive: false });
+
+            board.addEventListener('touchmove', (e) => {
+                if (!tutorialOverlay.classList.contains('hidden')) return;
+                e.preventDefault(); // Lock scroll completely inside board
+            }, { passive: false });
+
+            board.addEventListener('touchend', (e) => {
+                if (!touchStart || !tutorialOverlay.classList.contains('hidden')) return;
+                const dx = e.changedTouches[0].clientX - touchStart.x;
+                const dy = e.changedTouches[0].clientY - touchStart.y;
+                const absDx = Math.abs(dx), absDy = Math.abs(dy);
+
+                if (Math.max(absDx, absDy) > 40) { // swipe threshold
+                    if (absDx > absDy) game.move(dx > 0 ? 1 : 3);
+                    else game.move(dy > 0 ? 2 : 0);
+                }
+                touchStart = null;
+            });
+
+            // Buttons
+            document.getElementById('restart-btn').addEventListener('click', () => game.setup());
+            document.getElementById('retry-msg-btn').addEventListener('click', () => game.setup());
+            document.getElementById('undo-btn').addEventListener('click', () => game.undo());
+
+            document.getElementById('keep-playing-btn').addEventListener('click', () => {
+                game.keepPlaying = true;
+                document.getElementById('game-message').classList.remove('active');
+            });
+
+            // Theme Toggle
+            const themeBtn = document.getElementById('theme-btn');
+            themeBtn.addEventListener('click', () => {
+                document.body.classList.toggle('dark-mode');
+            });
+
+            // Sound Toggle
+            const soundBtn = document.getElementById('sound-btn');
+            const soundIcon = document.getElementById('sound-icon');
+            soundBtn.addEventListener('click', () => {
+                AudioEngine.toggle();
+                if (AudioEngine.isEnabled) {
+                    soundIcon.innerHTML = `<path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>`;
+                } else {
+                    soundIcon.innerHTML = `<path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/>`;
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

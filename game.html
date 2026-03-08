@@ -18,6 +18,7 @@
 
         canvas {
             display: block;
+            touch-action: none; /* required for pointer events to fire on iOS */
         }
 
         #ui {
@@ -129,32 +130,31 @@
         window.addEventListener('keydown', e => { if (e.key === 'w') keys.w = true; if (e.key === 'a') keys.a = true; if (e.key === 's') keys.s = true; if (e.key === 'd') keys.d = true; });
         window.addEventListener('keyup', e => { if (e.key === 'w') keys.w = false; if (e.key === 'a') keys.a = false; if (e.key === 's') keys.s = false; if (e.key === 'd') keys.d = false; });
 
-        // Shoot on Click (Desktop)
+        // Desktop: click to shoot
         window.addEventListener('mousedown', () => {
-            if (gameoverEl.style.display !== 'block') {
-                shoot(mouse.x, mouse.y);
+            if (gameoverEl.style.display !== 'block') shoot(mouse.x, mouse.y);
+        });
+
+        // ── Pointer Events (replaces all touch events) ──────────────────────
+        // Pointer Events work inside iframes on iOS Safari where touch events are blocked.
+        // pointermove: drag to aim/move player on touch; aim on desktop
+        canvas.addEventListener('pointermove', (e) => {
+            e.preventDefault();
+            mouse.x = e.clientX;
+            mouse.y = e.clientY;
+            // On touch: drag your finger to reposition the player
+            if (e.pointerType !== 'mouse' && player) {
+                player.x = e.clientX;
+                player.y = e.clientY;
             }
         });
 
-        // Mobile: Drag to move — listen on window so it works anywhere on screen
-        window.addEventListener('touchmove', (e) => {
-            e.preventDefault();
-            const touch = e.touches[0];
-            if (player) {
-                player.x = touch.clientX;
-                player.y = touch.clientY;
-                mouse.x = touch.clientX;
-                mouse.y = touch.clientY;
+        // pointerdown: tap/click to shoot
+        canvas.addEventListener('pointerdown', (e) => {
+            if (e.pointerType !== 'mouse' && gameoverEl.style.display !== 'block') {
+                shoot(e.clientX, e.clientY);
             }
-        }, { passive: false });
-
-        // Mobile: Tap to shoot — listen on window so UI overlays don't block it
-        window.addEventListener('touchstart', (e) => {
-            if (gameoverEl.style.display !== 'block') {
-                const touch = e.touches[0];
-                shoot(touch.clientX, touch.clientY);
-            }
-        }, { passive: false });
+        });
 
 
         class Player {
