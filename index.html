@@ -9,14 +9,18 @@
         content="Portfolio of Moshe Shtaygrud — Software Developer & Full Stack Engineer specializing in AI Agents, Automation, and Full-Stack.">
 
     <script>
-        // Smooth redirect to mobile at 1024px
-        function redirectMobile() {
-            document.body.style.transition = 'opacity 0.3s ease';
-            document.body.style.opacity = '0';
-            setTimeout(() => { window.location.href = 'mobile.html'; }, 320);
-        }
-        if (window.innerWidth <= 1024) redirectMobile();
-        window.addEventListener('resize', () => { if (window.innerWidth <= 1024) redirectMobile(); });
+        // Redirect to mobile at 1024px — body doesn't exist yet in <head>, so use replace() directly
+        if (window.innerWidth < 800) { window.location.replace('mobile.html'); }
+        // After DOM loads, handle live resize with a fade
+        document.addEventListener('DOMContentLoaded', function () {
+            window.addEventListener('resize', function () {
+                if (window.innerWidth <= 800) {
+                    document.body.style.transition = 'opacity 0.3s ease';
+                    document.body.style.opacity = '0';
+                    setTimeout(function () { window.location.replace('mobile.html'); }, 320);
+                }
+            });
+        });
     </script>
 
     <style>

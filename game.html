@@ -129,30 +129,29 @@
         window.addEventListener('keydown', e => { if (e.key === 'w') keys.w = true; if (e.key === 'a') keys.a = true; if (e.key === 's') keys.s = true; if (e.key === 'd') keys.d = true; });
         window.addEventListener('keyup', e => { if (e.key === 'w') keys.w = false; if (e.key === 'a') keys.a = false; if (e.key === 's') keys.s = false; if (e.key === 'd') keys.d = false; });
 
-        // Shoot on Click (Both Desktop and Mobile if they tap)
+        // Shoot on Click (Desktop)
         window.addEventListener('mousedown', () => {
-            if (gameoverEl.style.display === 'none') {
+            if (gameoverEl.style.display !== 'block') {
                 shoot(mouse.x, mouse.y);
             }
         });
 
-        // Mobile: Drag to move
-        canvas.addEventListener('touchmove', (e) => {
+        // Mobile: Drag to move — listen on window so it works anywhere on screen
+        window.addEventListener('touchmove', (e) => {
             e.preventDefault();
             const touch = e.touches[0];
-            player.x = touch.clientX;
-            player.y = touch.clientY;
-            // Update "mouse" for shooting direction references
-            mouse.x = touch.clientX;
-            mouse.y = touch.clientY;
+            if (player) {
+                player.x = touch.clientX;
+                player.y = touch.clientY;
+                mouse.x = touch.clientX;
+                mouse.y = touch.clientY;
+            }
         }, { passive: false });
 
-        // Mobile: Tap to shoot
-        canvas.addEventListener('touchstart', (e) => {
-            if (gameoverEl.style.display === 'none') {
+        // Mobile: Tap to shoot — listen on window so UI overlays don't block it
+        window.addEventListener('touchstart', (e) => {
+            if (gameoverEl.style.display !== 'block') {
                 const touch = e.touches[0];
-                // If dragging, we don't necessarily want to shoot every frame, 
-                // but a tap start is a good trigger.
                 shoot(touch.clientX, touch.clientY);
             }
         }, { passive: false });

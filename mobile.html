@@ -8,16 +8,17 @@
     <title>Moshe iOS</title>
 
     <script>
-        // Smooth desktop redirect at 1024px
-        function checkScreenSize() {
-            if (window.innerWidth > 1024) {
-                document.body.style.transition = 'opacity 0.3s ease';
-                document.body.style.opacity = '0';
-                setTimeout(() => { window.location.href = 'index.html'; }, 320);
-            }
-        }
-        checkScreenSize();
-        window.addEventListener('resize', checkScreenSize);
+        // Redirect to desktop at 1024px — body doesn't exist yet, use replace() directly
+        if (window.innerWidth > 800) { window.location.replace('index.html'); }
+        document.addEventListener('DOMContentLoaded', function () {
+            window.addEventListener('resize', function () {
+                if (window.innerWidth > 800) {
+                    document.body.style.transition = 'opacity 0.3s ease';
+                    document.body.style.opacity = '0';
+                    setTimeout(function () { window.location.replace('index.html'); }, 320);
+                }
+            });
+        });
     </script>
 
     <style>
